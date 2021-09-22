@@ -36,14 +36,6 @@
     return undefined;
   }
 
-  function createRequestJSON(script) {
-    if (script === undefined || 'string' !== typeof (script)) {
-      return undefined;
-    }
-
-    return {"script": script};
-  }
-
   function handleDocumentMutation(mutations) {
     for (const mutation of mutations) {
       const scriptWithNode = getKotlinScriptWithNode(mutation);
@@ -52,8 +44,9 @@
       }
       const script = scriptWithNode.script;
       const node = scriptWithNode.node;
-      console.log(createRequestJSON(script));
+
       const animationNode = addAnimationNode(node);
+      postScript(script);
     }
   }
 
@@ -72,7 +65,7 @@
           animation: lds-spinner 1.2s linear infinite;
         }
         .lds-spinner div:after {
-          content: " ";
+          content: ' ';
           display: block;
           position: absolute;
           top: 3px;
@@ -148,21 +141,33 @@
     }
     const loadingAnimation = document.createElement('div');
     loadingAnimation.className = 'lds-spinner';
-    loadingAnimation.innerHTML = `
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>`;
+    loadingAnimation.innerHTML = '<div></div>'.repeat(12);
     node.replaceWith(loadingAnimation);
     return loadingAnimation;
+  }
+
+  function handleResponse(response) {
+    console.log('response');
+    console.log(response);
+    console.log(response.body);
+  }
+
+  function handleError(response) {
+    console.log('ERROR');
+    console.log(response);
+    // TODO: show error status to user in place of loading animation
+  }
+
+  function postScript(script) {
+    if (script === undefined) {
+      return;
+    }
+
+    fetch('https://kotlin-html.sandbox.intellij.net/reception', {
+      method: 'POST',
+      body: script,
+      mode: 'no-cors'
+    }).then(handleResponse).catch(handleError);
   }
 
   const observer = new MutationObserver(handleDocumentMutation);
