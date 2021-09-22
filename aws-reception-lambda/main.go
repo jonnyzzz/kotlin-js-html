@@ -7,7 +7,24 @@ import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	runtime "github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"log"
 )
+
+var s3Service *s3.S3
+
+func init() {
+	awsSession, err := session.NewSession()
+	if err != nil {
+		log.Panic("Failed to open AWS session", err.Error(), err)
+		return
+	}
+
+	s3Service = s3.New(awsSession)
+}
 
 func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fmt.Printf("Processing request data for request %s.\n", request.RequestContext.RequestID)
@@ -29,10 +46,34 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		kotlinCode = []byte(request.Body)
 	}
 
+	//TODO: include compilation mode to the SHA
 	sha := sha256.Sum256(kotlinCode)
 	shaText := base64.URLEncoding.EncodeToString(sha[:])
 	fmt.Printf("Kotlin Code hash = %s\n", shaText)
 
+	s3KeyName := GetCacheBucketResponsePath(shaText)
+	resultObject, err := s3Service.GetObject(&s3.GetObjectInput{
+		Bucket: aws.String(GetCacheBucketName()),
+		Key:    aws.String(s3KeyName),
+	})
+
+	if resultObject != nil && err == nil {
+		fmt.Printf("The result is cached in S3, returning as-is from%s\n", s3KeyName)
+		return resultResponse(shaText, []byte(resultObject.String()))
+	}
+
+	if aer, ok := err.(awserr.Error); !ok || aer.Code() != s3.ErrCodeNoSuchKey {
+		msg := fmt.Sprint("Failed to get data from S3", err.Error(), err)
+		fmt.Print(msg)
+		return temporaryResponse(shaText, msg)
+	}
+
+	fmt.Printf("No object in the cache for %s\n", shaText)
+	//TODO: start new lambda and return the result
+	return mockResponse(shaText, kotlinCode)
+}
+
+func mockResponse(shaText string, kotlinCode []byte) (events.APIGatewayProxyResponse, error) {
 	return events.APIGatewayProxyResponse{
 		Body: fmt.Sprintf("this is our lambda:%s\n%s\n", shaText, string(kotlinCode)),
 		Headers: map[string]string{
