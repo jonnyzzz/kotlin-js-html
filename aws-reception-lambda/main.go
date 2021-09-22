@@ -9,22 +9,8 @@ import (
 	runtime "github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"log"
 )
-
-var s3Service *s3.S3
-
-func init() {
-	awsSession, err := session.NewSession()
-	if err != nil {
-		log.Panic("Failed to open AWS session", err.Error(), err)
-		return
-	}
-
-	s3Service = s3.New(awsSession)
-}
 
 func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fmt.Printf("Processing request data for request %s.\n", request.RequestContext.RequestID)
@@ -38,7 +24,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	if request.IsBase64Encoded {
 		data, err := base64.StdEncoding.DecodeString(request.Body)
 		if err != nil {
-			fmt.Printf("Failed to decode body %s", err.Error())
+			fmt.Printf("Failed to decode body %s\n", err.Error())
 			return events.APIGatewayProxyResponse{Body: "Failed to parse script", StatusCode: 400}, nil
 		}
 		kotlinCode = data
@@ -54,7 +40,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	cacheBucketKeyName := GetCacheBucketResponsePath(shaText)
 	cacheBucketName := GetCacheBucketName()
 
-	fmt.Printf("Checking S3 for result at %s %s", cacheBucketName, cacheBucketKeyName)
+	fmt.Printf("Checking S3 for result at %s %s\n", cacheBucketName, cacheBucketKeyName)
 	resultObject, err := s3Service.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(cacheBucketName),
 		Key:    aws.String(cacheBucketKeyName),
@@ -66,8 +52,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	}
 
 	if aer, ok := err.(awserr.Error); !ok || aer.Code() != s3.ErrCodeNoSuchKey {
-		msg := fmt.Sprint("Failed to get cached data", err.Error(), err)
-		fmt.Print(msg)
+		fmt.Printf("Failed to get cached object from S3. %s %v\n", err.Error(), err)
 		return temporaryResponse(shaText, "Failed to read caches")
 	}
 

@@ -1,7 +1,5 @@
 POST https://kotlin-html.sandbox.intellij.net/reception
+Content-Type: text/kotlin
 
 println("Hello")
-
-
-
 

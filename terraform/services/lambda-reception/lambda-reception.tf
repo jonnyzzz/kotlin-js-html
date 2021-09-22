@@ -34,14 +34,15 @@ data "aws_iam_policy_document" "iam" {
 data "aws_iam_policy_document" "permissions" {
   statement {
     actions = [
+      "s3:ListBucket",
       "s3:GetObject",
-      "s3:PutObject",
-      "s3:ListObjects",
     ]
+
     resources = [
       "arn:aws:s3:::${var.s3_bucket_name}",
       "arn:aws:s3:::${var.s3_bucket_name}/*",
     ]
+
     effect  = "Allow"
   }
 }
@@ -53,6 +54,7 @@ resource "aws_iam_role" "iam" {
 
 resource "aws_iam_role_policy" "iam" {
   role   = aws_iam_role.iam.id
+  name = "${var.prefix}_reception_lambda_policy"
   policy = data.aws_iam_policy_document.permissions.json
 }
 
