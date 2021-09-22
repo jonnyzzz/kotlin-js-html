@@ -1,4 +1,6 @@
-(function () {
+(() => {
+  const BASE_URL = 'http://localhost:7000';
+
   function isKotlinScriptNode(node) {
     if (node === undefined) {
       return false;
@@ -42,11 +44,9 @@
       if (scriptWithNode === undefined) {
         continue;
       }
-      const script = scriptWithNode.script;
-      const node = scriptWithNode.node;
 
-      const animationNode = addAnimationNode(node);
-      postScript(script);
+      const loadingNode = addAnimationNode(scriptWithNode.node);
+      postForCompiledScript(scriptWithNode.script, loadingNode);
     }
   }
 
@@ -146,32 +146,86 @@
     return loadingAnimation;
   }
 
-  function handleResponse(response) {
-    console.log('response');
-    console.log(response);
-    console.log(response.body);
+  function createScriptNode(scriptText) {
+    const node = document.createElement('script');
+    node.setAttribute('type', 'text/javascript');
+    node.innerHTML = scriptText;
+    return node;
   }
 
-  function handleError(response) {
-    console.log('ERROR');
+  function injectJsScriptNodes(scriptNodes, loadingNode) {
+    if (loadingNode === undefined) {
+      return;
+    }
+    if (scriptNodes === undefined) {
+      return;
+    }
+    if (!Array.isArray(scriptNodes)) {
+      return;
+    }
+    const parentNode = loadingNode.parentNode;
+    scriptNodes.forEach((node) => parentNode.insertBefore(node, loadingNode));
+    parentNode.removeChild(loadingNode);
+  }
+
+  function createResultHandler(script, node) {
+    return (result) => {
+      if (result === undefined) {
+        return;
+      }
+      if (result.type === 'retry-after-timeout') {
+        setTimeout(() => postForCompiledScript(script, node), result.timeout_millis);
+        return;
+      }
+      if (result.type === 'result' && Array.isArray(result.results)) {
+        const scriptNodes = result.results.map((urlScript) => fetch(urlScript).then((response) => {
+          if (!response.ok) {
+            throw 'Error while getting compiled script urls from server';
+          }
+          return response.text();
+        }).then(createScriptNode));
+        Promise.all(scriptNodes).then((nodes) => injectJsScriptNodes(nodes, node));
+        return;
+      }
+      throw `Undefined response result type: ${result.type}`;
+    };
+  }
+
+  function handleResponseError(response) {
+    console.log('RESPONSE ERROR');
     console.log(response);
     // TODO: show error status to user in place of loading animation
   }
 
-  function postScript(script) {
+  function handleJsonError(error) {
+    console.log('JSON ERROR');
+    console.log(error);
+    // TODO: show error status to user in place of loading animation
+  }
+
+  function createResponseHandler(script, node) {
+    return (response) => {
+      response.json()
+        .then(createResultHandler(script, node))
+        .catch(handleJsonError);
+    };
+  }
+
+  function postForCompiledScript(script, node) {
     if (script === undefined) {
       return;
     }
 
-    fetch('https://kotlin-html.sandbox.intellij.net/reception', {
+    fetch(`${BASE_URL}/reception`, {
       method: 'POST',
-      body: script,
-      mode: 'no-cors'
-    }).then(handleResponse).catch(handleError);
+      body: script
+    })
+      .then(createResponseHandler(script, node))
+      .catch(handleResponseError);
   }
 
   const observer = new MutationObserver(handleDocumentMutation);
-  const options = {
+  const observerOptions = {
     childList: true,
     attributes: true,
     characterData: true,
@@ -184,5 +238,5 @@
   const htmlNode = document.querySelector('html');
 
   addAnimationStyle();
-  observer.observe(htmlNode, options);
+  observer.observe(htmlNode, observerOptions);
 })();
