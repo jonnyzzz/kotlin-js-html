@@ -7,5 +7,5 @@ echo "Building lambda..."
 ../aws-reception-lamnda/build.sh
 
 
-terraform apply
+terraform apply -auto-approve
 
