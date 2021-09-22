@@ -11,4 +11,7 @@ go version
 NAME=lambda-reception
 GOOS=linux GOARCH=amd64 go build -o "build/$NAME" *.go
 
-zip "build/$NAME.zip" build/*
+cd build
+zip "$NAME.zip" -- *
+cd ..
+

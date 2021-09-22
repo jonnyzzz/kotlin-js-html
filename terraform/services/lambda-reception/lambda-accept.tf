@@ -6,16 +6,18 @@ output "lambda_arn" {
 }
 
 locals {
-  lambda_dir = abspath("${path.module}/../../aws-reception-lambda")
-  code_zip = abspath("${local.lambda_dir}/biuld/lambda-reception.zip")
+  lambda_dir = abspath("${path.module}/../../../aws-reception-lambda")
+  code_zip = abspath("${local.lambda_dir}/build/lambda-reception.zip")
 }
 
-resource "null_resource" "compile_lambda" {
-  provisioner "local-exec" {
-    command = "build.sh"
-    working_dir = local.lambda_dir
-  }
-}
+#   this makes the actual build here, but we assume it's done expternally
+#
+#  resource "null_resource" "compile_lambda" {
+#    provisioner "local-exec" {
+#      command = "./build.sh"
+#      working_dir = local.lambda_dir
+#    }
+#  }
 
 data "aws_iam_policy_document" "iam" {
   statement {
@@ -37,16 +39,14 @@ resource "aws_lambda_function" "f" {
   filename         = local.code_zip
   source_code_hash = filesha256(local.code_zip)
 
-  function_name    = "${var.prefix}_config_lambda"
+  function_name    = "${var.prefix}_reception_lambda"
   role             = aws_iam_role.iam.arn
 
-  handler          = "com.jetbrains.tbe.services.config.ConfigLambda"
+  handler          = "lambda-reception"
   runtime          = "go1.x"
 
   timeout     = "60"
   memory_size = "256"
-
-  depends_on = [null_resource.compile_lambda]
 
 //  environment {
 //    variables = {

@@ -15,7 +15,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		fmt.Printf("    %s: %s\n", key, value)
 	}
 
-	return events.APIGatewayProxyResponse{Body: request.Body, StatusCode: 200}, nil
+	return events.APIGatewayProxyResponse{Body: request.Body + " this is our lambda", StatusCode: 200}, nil
 }
 func main() {
 	runtime.Start(handleRequest)

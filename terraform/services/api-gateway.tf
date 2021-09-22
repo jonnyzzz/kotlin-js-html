@@ -18,6 +18,9 @@ resource "aws_api_gateway_deployment" "ktjs" {
   //https://github.com/hashicorp/terraform/issues/10674
   stage_name = replace("${local.prefix}_stage", "-", "_")
 
+  //force it to update no matter what was the change
+  stage_description = uuid()
+
   lifecycle {
     create_before_destroy = true
   }
