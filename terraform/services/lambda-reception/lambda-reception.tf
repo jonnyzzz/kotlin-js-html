@@ -1,5 +1,6 @@
 variable "prefix" {}
 variable "stack" {}
+variable "s3_bucket_name" {}
 
 output "lambda_arn" {
   value = aws_lambda_function.f.arn
@@ -21,18 +22,38 @@ locals {
 
 data "aws_iam_policy_document" "iam" {
   statement {
-    actions = [ "sts:AssumeRole"]
+    actions = ["sts:AssumeRole"]
     principals {
-      identifiers = [ "lambda.amazonaws.com"]
-      type = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+      type        = "Service"
     }
-    effect = "Allow"
+    effect  = "Allow"
+  }
+}
+
+data "aws_iam_policy_document" "permissions" {
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:ListObjects",
+    ]
+    resources = [
+      "arn:aws:s3:::${var.s3_bucket_name}",
+      "arn:aws:s3:::${var.s3_bucket_name}/*",
+    ]
+    effect  = "Allow"
   }
 }
 
 resource "aws_iam_role" "iam" {
   name = "${var.prefix}_iam"
   assume_role_policy = data.aws_iam_policy_document.iam.json
+}
+
+resource "aws_iam_role_policy" "iam" {
+  role   = aws_iam_role.iam.id
+  policy = data.aws_iam_policy_document.permissions.json
 }
 
 resource "aws_lambda_function" "f" {
@@ -48,11 +69,11 @@ resource "aws_lambda_function" "f" {
   timeout     = "60"
   memory_size = "256"
 
-//  environment {
-//    variables = {
-//
-//    }
-//  }
+  environment {
+    variables = {
+      KTJS_BUCKET = var.s3_bucket_name
+    }
+  }
 }
 
 module "cloudwatch" {

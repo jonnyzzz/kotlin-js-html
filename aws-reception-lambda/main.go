@@ -51,21 +51,24 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	shaText := base64.URLEncoding.EncodeToString(sha[:])
 	fmt.Printf("Kotlin Code hash = %s\n", shaText)
 
-	s3KeyName := GetCacheBucketResponsePath(shaText)
+	cacheBucketKeyName := GetCacheBucketResponsePath(shaText)
+	cacheBucketName := GetCacheBucketName()
+
+	fmt.Printf("Checking S3 for result at %s %s", cacheBucketName, cacheBucketKeyName)
 	resultObject, err := s3Service.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(GetCacheBucketName()),
-		Key:    aws.String(s3KeyName),
+		Bucket: aws.String(cacheBucketName),
+		Key:    aws.String(cacheBucketKeyName),
 	})
 
 	if resultObject != nil && err == nil {
-		fmt.Printf("The result is cached in S3, returning as-is from%s\n", s3KeyName)
+		fmt.Printf("The result is cached in S3, returning as-is from%s\n", cacheBucketKeyName)
 		return resultResponse(shaText, []byte(resultObject.String()))
 	}
 
 	if aer, ok := err.(awserr.Error); !ok || aer.Code() != s3.ErrCodeNoSuchKey {
-		msg := fmt.Sprint("Failed to get data from S3", err.Error(), err)
+		msg := fmt.Sprint("Failed to get cached data", err.Error(), err)
 		fmt.Print(msg)
-		return temporaryResponse(shaText, msg)
+		return temporaryResponse(shaText, "Failed to read caches")
 	}
 
 	fmt.Printf("No object in the cache for %s\n", shaText)

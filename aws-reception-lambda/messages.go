@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"log"
@@ -33,8 +32,7 @@ func temporaryResponse(shaText string, reason string) (events.APIGatewayProxyRes
 	}
 
 	return events.APIGatewayProxyResponse{
-		Body:            base64.StdEncoding.EncodeToString(data),
-		IsBase64Encoded: true,
+		Body: string(data),
 		Headers: map[string]string{
 			"Cache-Control": "no-cache, max-age=0",
 			"Content-Type":  "application/json; charset=UTF-8",
@@ -63,8 +61,7 @@ func resultResponse(shaText string, payload []byte) (events.APIGatewayProxyRespo
 
 	//TODO: allow caching once debug phase is completed
 	return events.APIGatewayProxyResponse{
-		Body:            base64.StdEncoding.EncodeToString(message),
-		IsBase64Encoded: true,
+		Body: string(message),
 		Headers: map[string]string{
 			"Cache-Control": "no-cache, max-age=0",
 			"Content-Type":  "application/json; charset=UTF-8",

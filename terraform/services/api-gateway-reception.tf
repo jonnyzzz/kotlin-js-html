@@ -4,6 +4,8 @@ module "reception-lambda" {
 
   prefix = local.prefix
   stack = local.stack
+
+  s3_bucket_name = module.website.bucket_name
 }
 
 resource "aws_api_gateway_resource" "reception" {
