@@ -28,17 +28,16 @@ provider "aws" {
 locals {
   stack = "kt-js-hackathon21"
 }
-#
-#
-#module "tbe-services" {
-#  source = "services"
-#  stack = local.stack
-#
-#  public_dns = "tbe.sandbox.intellij.net"
-#  public_dns_zone_part = "sandbox.intellij.net."
-#
-#  providers = {
-#    aws = aws
-#    aws.api_gateway = aws.api_gateway
-#  }
-#}
+
+module "tbe-services" {
+  source = "./services"
+  stack = local.stack
+
+  public_dns = "kotlin-html.sandbox.intellij.net"
+  public_dns_zone_part = "sandbox.intellij.net."
+
+  providers = {
+    aws = aws
+    aws.api_gateway = aws.api_gateway
+  }
+}
