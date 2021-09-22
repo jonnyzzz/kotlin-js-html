@@ -1,0 +1,7 @@
+window.onload = {
+    document.body?.append {
+        div {
+            +"Hello from Kotlin/JS"
+        }
+    }
+}

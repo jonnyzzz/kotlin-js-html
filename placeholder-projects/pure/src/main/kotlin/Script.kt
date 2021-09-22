@@ -1,14 +1,5 @@
-import kotlinx.browser.document
-import kotlinx.browser.window
-import kotlinx.html.div
-import kotlinx.html.dom.append
+import kotlinx.browser.*
+import kotlinx.html.*
+import kotlinx.html.dom.*
 
-fun main() {
-    window.onload = {
-        document.body?.append {
-            div {
-                +"Hello from JS"
-            }
-        }
-    }
-}
+fun main() = Unit
