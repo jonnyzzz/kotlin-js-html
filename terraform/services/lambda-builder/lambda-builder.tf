@@ -57,8 +57,8 @@ resource "aws_lambda_function" "f" {
   description = "Runs image from ${data.aws_ecr_image.ecr.image_pushed_at}"
   source_code_hash = data.aws_ecr_image.ecr.image_digest
 
-  timeout     = "600"
-  memory_size = "2048"
+  timeout     = "899"
+  memory_size = "3000"
 
   environment {
     variables = {

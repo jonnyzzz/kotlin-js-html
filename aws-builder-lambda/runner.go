@@ -25,14 +25,24 @@ func linesToChan(r io.Reader) {
 }
 
 func RunGradle() {
-	err := os.Setenv("HOME", "/runner")
-	err = os.Setenv("GRADLE_USER_HOME", "/runner")
+	err := os.Setenv("HOME", "/tmp/runner")
+	err = os.Setenv("GRADLE_USER_HOME", "/tmp/runner")
 
 	userHomeDir, _ := os.UserHomeDir()
 	log.Println("User Home is set to ", userHomeDir)
 
 	//cmd := exec.Command("sudo", "-H", "-u", "jonnyzzz", "bash", "-c", "cd /runner && ./gradlew stage")
-	cmd := exec.Command("bash", "--login", "-c", "cd /runner && id $(whoami) && mount && ls -lah && whoami && mkdir -p  && ./gradlew stage")
+	cmd := exec.Command("bash", "--login", "-c",
+		"mkdir -p /tmp/runner && "+
+			"cp -Rv /runner /tmp/ && "+
+			"cd /tmp/runner && "+
+			"id $(whoami) && "+
+			"mount && "+
+			"ls -lah && "+
+			"whoami && "+
+			"df -h . && "+
+			"./gradlew stage")
+
 	cmd.Dir = "/runner"
 
 	stdinPipe, err := cmd.StdinPipe()

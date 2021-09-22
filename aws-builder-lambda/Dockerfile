@@ -18,19 +18,15 @@ RUN wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add - && \
     add-apt-repository 'deb https://apt.corretto.aws stable main' && \
     apt-get update && sudo apt-get install -y java-11-amazon-corretto-jdk
 
-RUN useradd -ms /bin/bash -u 777 jonnyzzz && usermod -aG sudo jonnyzzz
-RUN mkdir -p /runner && chmod 777 -R /runner
+RUN mkdir -p /runner
 
 COPY build/runner /runner
-RUN chown -R jonnyzzz /runner && chmod a+x /runner/warmup.sh
+RUN chmod a+x /runner/warmup.sh
 
-USER jonnyzzz
 ### this line adds ~750mb of data to the image
-RUN /runner/warmup.sh
+### RUN /runner/warmup.sh
 
-USER root
 COPY build/lambda-builder /builder-runner/lambda-builder
-RUN chmod a+rx /builder-runner /builder-runner/lambda-builder
+RUN chmod +x /builder-runner/lambda-builder
 
-USER jonnyzzz
 ENTRYPOINT [ "/bin/bash", "-c", "/builder-runner/lambda-builder" ]
