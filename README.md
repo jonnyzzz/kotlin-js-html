@@ -1,5 +1,15 @@
 # Kotlin/JS in HTML Project objectives
 
+
+## Development Requirements:
+
+Go 1.17.1
+Terraform 1.0
+AWS CLI
+bash
+
+Seems to work fine on macOS.
+
 ## JS script embedded in HTML
 
 Create a JavaScript file that should be included in the HTML, so it would look for
