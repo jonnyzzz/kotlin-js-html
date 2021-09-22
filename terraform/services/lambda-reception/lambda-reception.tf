@@ -76,6 +76,11 @@ resource "aws_lambda_function" "f" {
       KTJS_BUCKET = var.s3_bucket_name
     }
   }
+
+  tags = {
+    stack   = var.stack
+    prefix  = var.prefix
+  }
 }
 
 module "cloudwatch" {

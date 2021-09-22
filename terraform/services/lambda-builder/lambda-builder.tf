@@ -20,53 +20,6 @@ data "aws_iam_policy_document" "iam" {
   }
 }
 
-resource "aws_ecr_repository" "ecr" {
-  name = "${var.stack}-builder-${var.flavour}"
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-  image_tag_mutability = "MUTABLE"
-  tags = {
-    stack   = var.stack
-    prefix  = var.prefix
-    flavour = var.flavour
-  }
-}
-
-data "aws_region" "aws" {
-
-}
-
-resource "local_file" "ecr" {
-  filename = local.include_file
-  content = <<EOT
-
-AWS_REGION=${data.aws_region.aws.name}
-ECR_URL=${aws_ecr_repository.ecr.repository_url}
-ECR_TAG=${local.image_tag}
-
-EOT
-}
-
-resource "aws_ecr_repository_policy" "ecr" {
-  policy     = data.aws_iam_policy_document.iam.json
-  repository = aws_ecr_repository.ecr.id
-}
-
-data "aws_iam_policy_document" "ecr" {
-  statement {
-    effect  = "Allow"
-    actions = [
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer"
-    ]
-    principals {
-      identifiers = ["lambda.amazonaws.com"]
-      type        = "Service"
-    }
-  }
-}
-
 data "aws_iam_policy_document" "permissions" {
   statement {
     actions = [
@@ -101,6 +54,9 @@ resource "aws_lambda_function" "f" {
   image_uri = "${aws_ecr_repository.ecr.repository_url}:${local.image_tag}"
   package_type  = "Image"
 
+  description = "Runs image from ${data.aws_ecr_image.ecr.image_pushed_at}"
+  source_code_hash = data.aws_ecr_image.ecr.image_digest
+
   timeout     = "600"
   memory_size = "2048"
 
@@ -108,6 +64,12 @@ resource "aws_lambda_function" "f" {
     variables = {
       KTJS_BUCKET = var.s3_bucket_name
     }
+  }
+
+  tags = {
+    stack   = var.stack
+    prefix  = var.prefix
+    flavour = var.flavour
   }
 }
 
