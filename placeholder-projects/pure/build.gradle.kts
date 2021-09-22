@@ -1,19 +1,16 @@
 plugins {
-    kotlin("js") version "1.5.10"
+    kotlin("js") version "1.5.30"
 }
 
 group = "org.jetbrains.k-js-html"
 version = "1.0"
 
-val kotlinxHtmlV = "0.7.2"
-
 repositories {
-    jcenter()
     mavenCentral()
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-html:$kotlinxHtmlV")
+    implementation("org.jetbrains.kotlinx:kotlinx-html:0.7.2")
 }
 
 kotlin {
@@ -36,7 +33,7 @@ tasks.assemble {
 }
 
 tasks.register<Copy>("copyAssembled") {
-    mustRunAfter("assemble")
+    dependsOn("assemble")
     from(layout.buildDirectory.dir("distributions/${rootProject.name}.js"))
     from(layout.buildDirectory.dir("distributions/${rootProject.name}.js.map"))
     into(getOutputDir())
