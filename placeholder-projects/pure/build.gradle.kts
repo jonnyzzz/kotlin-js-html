@@ -25,7 +25,9 @@ kotlin {
 }
 
 tasks.register("replaceInputFile") {
+  doFirst {
     replaceInputFile()
+  }
 }
 
 tasks.assemble {

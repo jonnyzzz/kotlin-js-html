@@ -10,7 +10,7 @@ fi
 
 if [[ "${1:-empty}" == *build* ]] ; then
   echo "Building builder lambda..."
-  ./../aws-builder-lambda/build.sh
+  ./../aws-builder-lambda/build.sh push
 fi
 
 terraform apply -auto-approve
