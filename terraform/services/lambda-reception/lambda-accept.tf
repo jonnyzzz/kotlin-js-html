@@ -6,7 +6,15 @@ output "lambda_arn" {
 }
 
 locals {
-  code_zip = abspath("${path.module}/../binaries/lambda-config/lambda-config.zip")
+  lambda_dir = abspath("${path.module}/../../aws-reception-lambda")
+  code_zip = abspath("${local.lambda_dir}/biuld/lambda-reception.zip")
+}
+
+resource "null_resource" "compile_lambda" {
+  provisioner "local-exec" {
+    command = "build.sh"
+    working_dir = local.lambda_dir
+  }
 }
 
 data "aws_iam_policy_document" "iam" {
@@ -33,10 +41,12 @@ resource "aws_lambda_function" "f" {
   role             = aws_iam_role.iam.arn
 
   handler          = "com.jetbrains.tbe.services.config.ConfigLambda"
-  runtime          = "java11"
+  runtime          = "go1.x"
 
   timeout     = "60"
   memory_size = "256"
+
+  depends_on = [null_resource.compile_lambda]
 
 //  environment {
 //    variables = {

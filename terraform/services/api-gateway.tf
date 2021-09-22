@@ -4,8 +4,8 @@ resource "aws_api_gateway_deployment" "ktjs" {
     aws_api_gateway_integration.root_get,
     aws_api_gateway_method.root_get,
 
-#    module.config-feed-lambda-handler,
-#    module.config-feed-lambda,
+    module.reception-lambda-handler,
+    module.reception-lambda,
 
   ]
 
