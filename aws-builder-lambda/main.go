@@ -11,6 +11,8 @@ type MyEvent struct {
 }
 
 func HandleRequest(ctx context.Context, name MyEvent) (string, error) {
+	fmt.Println("Running Gradle build...")
+	RunGradle()
 	return fmt.Sprintf("Hello %s!", name.Name), nil
 }
 

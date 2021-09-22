@@ -1,27 +1,36 @@
-FROM public.ecr.aws/lambda/provided:al2
+FROM ubuntu:20.04
 
-RUN yum update -y
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LC_ALL=C.UTF-8
 
-RUN curl -sL https://rpm.nodesource.com/setup_16.x | bash - && \
-    yum install -y nodejs && \
+RUN apt-get update && \
+    apt-get install -y apt-utils sudo curl wget mc vim git software-properties-common
+
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get update && \
+    apt-get install -y nodejs && \
     node -v && \
     npm -v  && \
     npm install --global yarn && \
     yarn -v
 
+RUN wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add - && \
+    add-apt-repository 'deb https://apt.corretto.aws stable main' && \
+    apt-get update && sudo apt-get install -y java-11-amazon-corretto-jdk
 
-RUN yum install -y java-11-amazon-corretto-headless java-11-amazon-corretto && java -version
-
-RUN yum install -y curl wget vim which zip
+RUN useradd -ms /bin/bash jonnyzzz
+RUN mkdir -p /runner && chown 777 -R /runner
 
 COPY build/runner /runner
-RUN cd /runner && chmod +x ./warmup.sh && ./warmup.sh
+RUN chown -R jonnyzzz /runner && chmod a+x /runner/warmup.sh /builder-runner/lambda-builder
 
-### we may build Go binary also in the same container,
-### e.g. as in https://docs.aws.amazon.com/lambda/latest/dg/go-image.html
+USER jonnyzzz
+### this line adds ~750mb of data to the image
+RUN /runner/warmup.sh
 
-### this one changes too often, let's keep that closer to the end
+USER root
 COPY build/lambda-builder /builder-runner/lambda-builder
+RUN chmod a+x /builder-runner /builder-runner/lambda-builder
 
-
-ENTRYPOINT [ "/builder-runner/lambda-builder" ]
+USER jonnyzzz
+ENTRYPOINT [ "/bin/bash", "-c", "/builder-runner/lambda-builder" ]
