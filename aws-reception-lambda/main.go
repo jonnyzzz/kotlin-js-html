@@ -48,18 +48,19 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	shaText := base64.URLEncoding.EncodeToString(sha[:])
 	fmt.Printf("Kotlin Code hash = %s\n", shaText)
 
-	cacheBucketKeyName := GetCacheBucketResponsePath(shaText)
+	cacheBucketResultKey := GetCacheBucketResponsePath(shaText)
+	cacheBucketInputKey := GetCacheBucketInputPath(shaText)
 	cacheBucketName := GetCacheBucketName()
 
 	if !forceRebuild {
-		fmt.Printf("Checking S3 for result at %s %s\n", cacheBucketName, cacheBucketKeyName)
+		fmt.Printf("Checking S3 for result at %s %s\n", cacheBucketName, cacheBucketResultKey)
 		resultObject, err := s3Service.GetObject(&s3.GetObjectInput{
 			Bucket: aws.String(cacheBucketName),
-			Key:    aws.String(cacheBucketKeyName),
+			Key:    aws.String(cacheBucketResultKey),
 		})
 
 		if resultObject != nil && err == nil {
-			fmt.Printf("The result is cached in S3, returning as-is from%s\n", cacheBucketKeyName)
+			fmt.Printf("The result is cached in S3, returning as-is from%s\n", cacheBucketResultKey)
 			payload, err := ioutil.ReadAll(resultObject.Body)
 			if err == nil {
 				return resultResponse(shaText, payload)
@@ -70,6 +71,17 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 			fmt.Printf("Failed to get cached object from S3. %s %v\n", err.Error(), err)
 			return temporaryResponse(shaText, "Failed to read caches")
 		}
+	}
+
+	_, err := s3Service.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String(cacheBucketName),
+		Key:    aws.String(cacheBucketInputKey),
+		Body:   bytes.NewReader(kotlinCode),
+	})
+
+	if err != nil {
+		fmt.Printf("Failed to write input status to S3: %v\n", err)
+		return temporaryResponse(shaText, "Failed write builder input")
 	}
 
 	fmt.Printf("No object in the cache for %s\n", shaText)
@@ -90,8 +102,12 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 					Name: aws.String("builder"),
 					Environment: []*ecs.KeyValuePair{
 						{
-							Name:  aws.String("New Variable"),
-							Value: aws.String("Test"),
+							Name:  aws.String("KTJS_SHATEXT"),
+							Value: aws.String(shaText),
+						},
+						{
+							Name:  aws.String("KTJS_INPUT_KEY"),
+							Value: aws.String(cacheBucketInputKey),
 						},
 					},
 				},
@@ -106,7 +122,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 
 	_, err = s3Service.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(cacheBucketName),
-		Key:    aws.String(cacheBucketKeyName),
+		Key:    aws.String(cacheBucketResultKey),
 		Body:   bytes.NewReader(GeneratePendingMessage("Builder has started", *startedTask.Tasks[0].TaskArn)),
 	})
 
