@@ -4,9 +4,13 @@ resource "aws_api_gateway_deployment" "ktjs" {
     aws_api_gateway_integration.root_get,
     aws_api_gateway_method.root_get,
 
+    module.reception-lambda-handler-cors,
     module.reception-lambda-handler,
     module.reception-lambda,
 
+    module.get-lambda,
+    module.get-lambda-handler,
+    module.get-lambda-handler-cors,
   ]
 
 //  variables {

@@ -3,6 +3,11 @@
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 set -e -x -u
 
+if [[ "${1:-empty}" == *get* ]] ; then
+  echo "Building reception lambda..."
+  ./../aws-get-lambda/build.sh
+fi
+
 if [[ "${1:-empty}" == *rec* ]] ; then
   echo "Building reception lambda..."
   ./../aws-reception-lambda/build.sh

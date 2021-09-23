@@ -10,13 +10,15 @@ variable "rest_resource_path" {
 
 variable lambda_arn {}
 
+variable "http_method" {}
+
 data aws_caller_identity current {}
 data aws_region current { }
 
 resource "aws_api_gateway_method" "method" {
   rest_api_id = var.rest_api_id
   resource_id = var.rest_resource_id
-  http_method = "POST"
+  http_method = var.http_method
   authorization = "NONE"
 
   request_parameters = {

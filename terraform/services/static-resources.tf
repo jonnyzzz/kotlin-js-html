@@ -1,24 +1,19 @@
 
 locals {
-  static_cdn_domain = "static.${var.public_dns}"
+  static_cdn_domain = var.public_dns
   static_cdn_base_url = "https://${local.static_cdn_domain}"
+  bucket_name = "${local.prefix}-working-bucket"
 }
 
-module "website" {
-  source = "github.com/jetbrains-infra/terraform-aws-static-website?ref=0.0.10"
-
-  aws_region             = data.aws_region.current.id
-  use_s3_origin_identity = true
-  register_ipv6          = true
-  tags                   = {
-    Stack = local.stack
-    Prefix = local.prefix
-    Hackathon21 = ""
-    Name = var.public_dns
-  }
-
-  route53_zone_name = var.public_dns_zone_part
-  domain_name       = local.static_cdn_domain
-  website_name      = "kotlin-js-html-hackathon21-${local.stack}"
+resource "aws_s3_bucket" "bucket" {
+  bucket = local.bucket_name
+  acl    = "private"
 }
+
+resource "aws_s3_bucket_object" "shim" {
+  bucket = local.bucket_name
+  key    = "v1/shim.js"
+  content = file(abspath("${path.module}/../../frontend-script/shim.js"))
+}
+
 

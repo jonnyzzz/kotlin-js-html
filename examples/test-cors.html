@@ -1,5 +1,21 @@
 <html lang="EN">
 <script type="application/javascript">
+  fetch(" https://kotlin-html.sandbox.intellij.net/get/v1/shim.js", {
+    method: 'GET', // *GET, POST, PUT, DELETE, etc.
+    // mode: 'no-cors', // no-cors, *cors, same-origin
+    // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+    headers: {
+      'Content-Type': 'application/kotlin'
+    },
+    redirect: 'follow', // manual, *follow, error
+    referrerPolicy: 'no-referrer' // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+  }).then(function (p) {
+    console.log(p);
+    return p.text();
+  }).then(function (json) {
+    console.log(json);
+  });
+
   fetch("https://kotlin-html.sandbox.intellij.net/reception", {
     method: 'POST', // *GET, POST, PUT, DELETE, etc.
     // mode: 'no-cors', // no-cors, *cors, same-origin
@@ -15,6 +31,24 @@
     return p.json();
   }).then(function (json) {
     console.log(JSON.stringify(json, null, "  "));
+
+    json.results.files.forEach(fileInfo => {
+      console.log(JSON.stringify(fileInfo, null, "  "));
+
+      fetch(fileInfo.cnd_url, {
+        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+        // mode: 'no-cors', // no-cors, *cors, same-origin
+        // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        headers: {
+          'Content-Type': 'application/kotlin'
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      }).then(function (p) {
+        console.log(p);
+        return p.json();
+      })
+    });
   }).catch(e => console.log(e));
 </script>
 </html>

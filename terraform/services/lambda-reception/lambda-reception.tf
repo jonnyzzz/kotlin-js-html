@@ -6,6 +6,8 @@ variable "ecs_cluster_name" { }
 variable "ecs_task_definition_arn" { }
 variable "ecs_task_subnets" { }
 
+variable "static_cdn_url_base" {}
+
 output "lambda_arn" {
   value = aws_lambda_function.f.arn
 }
@@ -93,6 +95,7 @@ resource "aws_lambda_function" "f" {
       KTJS_ECS_CLUSTER_NAME = var.ecs_cluster_name,
       KTJS_ECS_TASK_DEFINITION = var.ecs_task_definition_arn,
       KTJS_ECS_TASK_SUBNETS = var.ecs_task_subnets,
+      KTJS_CDN_BASE = var.ecs_cluster_name,
     }
   }
 

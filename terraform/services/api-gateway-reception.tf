@@ -5,11 +5,13 @@ module "reception-lambda" {
   prefix = local.prefix
   stack = local.stack
 
-  s3_bucket_name = module.website.bucket_name
+  s3_bucket_name = local.bucket_name
 
   ecs_cluster_name        = module.lambda-builder.ecs_cluster_name
   ecs_task_definition_arn = module.lambda-builder.ecs_task_definition_arn
   ecs_task_subnets        = module.lambda-builder.ecs_task_subnets
+
+  static_cdn_url_base = local.static_cdn_base_url
 }
 
 resource "aws_api_gateway_resource" "reception" {
@@ -35,4 +37,6 @@ module "reception-lambda-handler" {
 
   rest_resource_id = aws_api_gateway_resource.reception.id
   rest_resource_path = aws_api_gateway_resource.reception.path
+
+  http_method = "POST"
 }
