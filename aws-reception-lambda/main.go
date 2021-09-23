@@ -63,7 +63,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 			fmt.Printf("The result is cached in S3, returning as-is from%s\n", cacheBucketResultKey)
 			payload, err := ioutil.ReadAll(resultObject.Body)
 			if err == nil {
-				return resultResponse(shaText, payload)
+				return ApiGatewayResponseJson(payload)
 			}
 		}
 
@@ -123,7 +123,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	_, err = s3Service.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(cacheBucketName),
 		Key:    aws.String(cacheBucketResultKey),
-		Body:   bytes.NewReader(GeneratePendingMessage("Builder has started", *startedTask.Tasks[0].TaskArn)),
+		Body:   bytes.NewReader(temporaryPayload(shaText, "Builder task scheduled")),
 	})
 
 	if err != nil {
