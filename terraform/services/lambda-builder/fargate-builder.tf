@@ -34,25 +34,37 @@ resource "aws_iam_role_policy" "task_exec_role_policy" {
   name = "${var.prefix}_builder_exec_${var.flavour}"
   role = aws_iam_role.task_exec_role.id
 
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ecr:GetAuthorizationToken",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchGetImage",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-            ],
-            "Resource": "*"
-        }
-    ]
+  policy = data.aws_iam_policy_document.task_exec_role_policy.json
 }
-EOF
+
+data "aws_iam_policy_document" "task_exec_role_policy" {
+  statement {
+    effect    = "Allow"
+    actions   = [
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject",
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.s3_bucket_name}",
+      "arn:aws:s3:::${var.s3_bucket_name}/*",
+    ]
+
+    effect = "Allow"
+  }
 }
 
 locals {
