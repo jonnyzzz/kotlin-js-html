@@ -13,7 +13,6 @@ kotlin {
       webpackTask {
         cssSupport.enabled = true
         sourceMaps = true
-        outputFileName = "script.js"
       }
     }
   }
@@ -26,5 +25,5 @@ kotlin {
     }
   }
   val mainSourceSet = sourceSets.getByName("jsMain")
-  project.addSubprojectsTasks(mainSourceSet)
+  project.addSubprojectsTasks(mainSourceSet, "jsBrowserProductionWebpack")
 }

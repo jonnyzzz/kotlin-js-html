@@ -1,5 +1,8 @@
 import org.gradle.api.Named
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.tasks.Sync
+import org.gradle.kotlin.dsl.configure
 import java.io.File
 
 data class BuildStatus(var project: String? = null, var dependencies: List<String> = emptyList())
@@ -14,8 +17,10 @@ object Build {
 
   private val DEPENDENCY_REGEX = Regex("useNpmPackage[ \\t]*[(][ \\t]*\"(?:[^\"\\\\]|\\\\.)*\"[ \\t]*[)]")
 
-  fun Project.addSubprojectsTasks(sourceSet: Named) {
-    val distTask = getDistTaskName(sourceSet)
+  fun Project.addSubprojectsTasks(sourceSet: Named, distTask: String) {
+    val fullDistBuildInnerTask = tasks.register("fullDistBuildInner")
+    if (!isRelevantProject()) return
+
     val buildStatus = BuildStatus()
 
     val manageInputFileTask = tasks.register("manageInputFile") {
@@ -28,20 +33,14 @@ object Build {
       dependsOn(manageInputFileTask)
     }
 
-    val copyResultTask = tasks.register("copyResult") {
+    val copyResultTask = tasks.register("copyResult", Sync::class.java) {
       dependsOn(distTask)
 
-      doFirst {
-        if (buildStatus.project != project.name) return@doFirst
-
-        layout.buildDirectory.file("distributions/script.js").get().asFile
-          .overwriteCopyTo(File(getOutputDir(), "script.js"))
-        layout.buildDirectory.file("distributions/script.js.map").get().asFile
-          .overwriteCopyTo(File(getOutputDir(), "script.js.map"))
-      }
+      from(File(buildDir, "distributions"))
+      into(getOutputDir())
     }
 
-    tasks.register("fullDistBuildInner") {
+    fullDistBuildInnerTask.configure {
       dependsOn(manageInputFileTask)
       dependsOn(distTask)
       dependsOn(copyResultTask)
@@ -68,9 +67,6 @@ object Build {
   private fun modifyInputFile(content: String) =
     content.let(::wrapInMainCallIfNeeded).let(::removeProjectDefinition)
 
-  private fun getDistTaskName(sourceSet: Named): String =
-    (sourceSet.name.dropLastWhile { it.isLowerCase() }.dropLast(1) + "BrowserDistribution").decapitalize()
-
   private fun File.overwriteCopyTo(target: File) = copyTo(target, overwrite = true)
 
   private fun wrapInMainCallIfNeeded(content: String): String =
@@ -87,6 +83,14 @@ object Build {
 
   private fun getInputFile() = getEnv(envName = "INPUT_FILE")?.let(::File)
     ?.takeIf { !it.isDirectory && it.exists() }?.absolutePath
+
+  fun Project.isRelevantProject() : Boolean {
+    val inputScript = getInputFile()?.let(::File)?.readText() ?: return false
+
+    val projName = determinePlaceholderProject(inputScript)
+    println("Selected project name: $projName")
+    return projName == this.name
+  }
 
   private fun Project.manageInputFile(sourceSet: String, buildStatus: BuildStatus) {
     val inputScript = getInputFile()?.let(::File)?.readText() ?: return

@@ -12,12 +12,11 @@ kotlin {
       commonWebpackConfig {
         cssSupport.enabled = true
         sourceMaps = true
-        outputFileName = "script.js"
       }
     }
   }
   val mainSourceSet = sourceSets.getByName("main")
-  project.addSubprojectsTasks(mainSourceSet)
+  project.addSubprojectsTasks(mainSourceSet, "browserProductionWebpack")
 }
 
 dependencies {
