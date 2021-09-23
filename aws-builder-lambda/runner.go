@@ -33,9 +33,7 @@ func (r *OutputCollector) PushLine(line string) {
 func (r *OutputCollector) Results() []string {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	c := make([]string, 0, 0)
-	copy(c, r.buffer)
-	return c
+	return append([]string{}, r.buffer...)
 }
 
 func linesToChan(r io.Reader, collector *OutputCollector) {
@@ -131,6 +129,9 @@ func RunGradle(progressMessages chan []string) ([]string, error) {
 	}()
 
 	err = cmd.Wait()
+
+	isPumpRunning = false
+
 	if err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			// The program has exited with an exit code != 0
