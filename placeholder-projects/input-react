@@ -1,0 +1,61 @@
+object WelcomeStyles : StyleSheet("WelcomeStyles", isStatic = true) {
+  val textContainer by css {
+    padding(5.px)
+
+    backgroundColor = rgb(8, 97, 22)
+    color = rgb(56, 246, 137)
+  }
+
+  val textInput by css {
+    margin(vertical = 5.px)
+
+    fontSize = 14.px
+  }
+}
+
+external interface WelcomeProps : RProps {
+  var name: String
+}
+
+data class WelcomeState(val name: String) : RState
+
+@JsExport
+class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(props) {
+
+  init {
+    state = WelcomeState(props.name)
+  }
+
+  override fun RBuilder.render() {
+    styledDiv {
+      css {
+        +WelcomeStyles.textContainer
+      }
+      +"Hello, ${state.name}"
+    }
+    styledInput {
+      css { +WelcomeStyles.textInput }
+      attrs {
+        type = InputType.text
+        value = state.name
+        onChangeFunction = { event ->
+          setState(
+            WelcomeState(name = (event.target as HTMLInputElement).value)
+          )
+        }
+      }
+    }
+  }
+}
+
+fun main() {
+  window.onload = {
+    render(document.getElementById("root")) {
+      child(Welcome::class) {
+        attrs {
+          name = "Kotlin/JS"
+        }
+      }
+    }
+  }
+}
