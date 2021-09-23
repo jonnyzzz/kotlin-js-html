@@ -78,7 +78,7 @@ resource aws_cloudwatch_log_group logs {
 
 resource "aws_ecs_task_definition" "builder" {
   family                   = "${var.prefix}-builder-${var.flavour}"
-#  task_role_arn            = "${aws_iam_role.stepfunction_ecs_task_role.arn}"
+  task_role_arn            = aws_iam_role.task_exec_role.arn
   execution_role_arn       = aws_iam_role.task_exec_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
