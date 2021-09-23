@@ -9,7 +9,7 @@ npm -v
 env | sort
 
 which java
-ls -lah $(which java)
+ls -lah "$(which java)"
 
 chmod +x ./gradlew
 ./gradlew tasks
