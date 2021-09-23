@@ -1,5 +1,5 @@
 (() => {
-  const BASE_URL = 'http://localhost:7000';
+  const BASE_URL = 'https://kotlin-html.sandbox.intellij.net';
 
   function isKotlinScriptNode(node) {
     if (node === undefined) {
@@ -146,10 +146,13 @@
     return loadingAnimation;
   }
 
-  function createScriptNode(scriptText) {
+  function fileUrlToScriptNode(scriptSource) {
+    if (scriptSource === undefined) {
+      return undefined;
+    }
     const node = document.createElement('script');
-    node.setAttribute('type', 'text/javascript');
-    node.innerHTML = scriptText;
+    node.setAttribute('type', 'application/javascript');
+    node.setAttribute('src', scriptSource);
     return node;
   }
 
@@ -163,31 +166,52 @@
     if (!Array.isArray(scriptNodes)) {
       return;
     }
+    console.log(scriptNodes);
     const parentNode = loadingNode.parentNode;
     scriptNodes.forEach((node) => parentNode.insertBefore(node, loadingNode));
     parentNode.removeChild(loadingNode);
   }
 
-  function createResultHandler(script, node) {
-    return (result) => {
-      if (result === undefined) {
+  function fileToJsResultFileUrl(file) {
+    if (file === undefined) {
+      return undefined;
+    }
+    if ('string' !== typeof file.cnd_url) {
+      return undefined;
+    }
+    if (!file.cnd_url.endsWith('.js')) {
+      return undefined;
+    }
+    return file.cnd_url;
+  }
+
+  function createJsonResponseHandler(script, node) {
+    return (response) => {
+      if (response === undefined) {
         return;
       }
-      if (result.type === 'retry-after-timeout') {
-        setTimeout(() => postForCompiledScript(script, node), result.timeout_millis);
+      if (response.type === 'retry-after-timeout') {
+        setTimeout(() => postForCompiledScript(script, node), response.timeout_millis);
         return;
       }
-      if (result.type === 'result' && Array.isArray(result.results)) {
-        const scriptNodes = result.results.map((urlScript) => fetch(urlScript).then((response) => {
-          if (!response.ok) {
-            throw 'Error while getting compiled script urls from server';
-          }
-          return response.text();
-        }).then(createScriptNode));
-        Promise.all(scriptNodes).then((nodes) => injectJsScriptNodes(nodes, node));
+      if (response.type === 'result' && 'object' === typeof response.results) {
+        if (response.results.status !== 'success') {
+          console.log('Error status received - probably compilation error');
+          console.log(response);
+          // TODO show to user
+        }
+        if (!Array.isArray(response.results.files)) {
+          console.log('Invalid data received - should receive array');
+          // TODO show to user
+        }
+        const scriptNodes = response.results.files
+          .map(fileToJsResultFileUrl)
+          .map(fileUrlToScriptNode)
+          .filter((node) => node !== undefined);
+        injectJsScriptNodes(scriptNodes, node);
         return;
       }
-      throw `Undefined response result type: ${result.type}`;
+      throw `Undefined response result type: ${response.type}`;
     };
   }
 
@@ -206,7 +230,7 @@
   function createResponseHandler(script, node) {
     return (response) => {
       response.json()
-        .then(createResultHandler(script, node))
+        .then(createJsonResponseHandler(script, node))
         .catch(handleJsonError);
     };
   }
