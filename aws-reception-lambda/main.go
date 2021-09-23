@@ -9,6 +9,7 @@ import (
 	runtime "github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
@@ -57,6 +58,38 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	}
 
 	fmt.Printf("No object in the cache for %s\n", shaText)
+
+	startedTask, err := ecsClient.RunTask(&ecs.RunTaskInput{
+		Count:          aws.Int64(1),
+		Cluster:        aws.String(GetEcsClusterName()),
+		LaunchType:     aws.String("FARGATE"),
+		TaskDefinition: aws.String(GetEcsTaskDefinitionArn()),
+		NetworkConfiguration: &ecs.NetworkConfiguration{
+			AwsvpcConfiguration: &ecs.AwsVpcConfiguration{
+				AssignPublicIp: aws.String("ENABLED"),
+				Subnets:        aws.StringSlice(GetEcsTaskSubnets()),
+			},
+		},
+	})
+
+	//startedTask, err := ecsClient.StartTask(&ecs.StartTaskInput{
+	//	Cluster: aws.String(GetEcsClusterName()),
+	//
+	//  TaskDefinition: aws.String(GetEcsTaskDefinitionArn()),
+	//  NetworkConfiguration: &ecs.NetworkConfiguration{
+	//    AwsvpcConfiguration: &ecs.AwsVpcConfiguration{
+	//      AssignPublicIp: aws.String("ENABLED"),
+	//      Subnets: aws.StringSlice(GetEcsTaskSubnets()),
+	//    },
+	//  },
+	//})
+
+	if err != nil {
+		fmt.Printf("Failed to start ECS task: %v\n", err)
+	}
+
+	fmt.Printf("Started ECS task: %v\n", startedTask.GoString())
+
 	//TODO: start new lambda and return the result
 	return mockResponse(shaText, kotlinCode)
 }

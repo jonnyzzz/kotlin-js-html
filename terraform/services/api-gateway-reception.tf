@@ -6,6 +6,10 @@ module "reception-lambda" {
   stack = local.stack
 
   s3_bucket_name = module.website.bucket_name
+
+  ecs_cluster_name        = module.lambda-builder.ecs_cluster_name
+  ecs_task_definition_arn = module.lambda-builder.ecs_task_definition_arn
+  ecs_task_subnets        = module.lambda-builder.ecs_task_subnets
 }
 
 resource "aws_api_gateway_resource" "reception" {

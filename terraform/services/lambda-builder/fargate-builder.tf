@@ -1,4 +1,5 @@
-resource "aws_ecs_cluster" "stepfunction_ecs_cluster" {
+
+resource "aws_ecs_cluster" "cluster" {
   name = "${var.prefix}-cluster-${var.flavour}"
 
   tags = {
@@ -63,7 +64,7 @@ resource aws_cloudwatch_log_group logs {
   retention_in_days = 60
 }
 
-resource "aws_ecs_task_definition" "stepfunction_ecs_task_definition" {
+resource "aws_ecs_task_definition" "builder" {
   family                   = "${var.prefix}-builder-${var.flavour}"
 #  task_role_arn            = "${aws_iam_role.stepfunction_ecs_task_role.arn}"
   execution_role_arn       = aws_iam_role.task_exec_role.arn
@@ -99,3 +100,22 @@ DEFINITION
   }
 }
 
+output "ecs_cluster_name" {
+  value = aws_ecs_cluster.cluster.name
+}
+
+output "ecs_task_definition_arn" {
+  value = aws_ecs_task_definition.builder.arn
+}
+
+output "ecs_task_subnets" {
+  value = join(",", aws_default_subnet.subnet.*.id)
+}
+
+data "aws_availability_zones" "az" {
+}
+
+resource "aws_default_subnet" "subnet" {
+  count = length(data.aws_availability_zones.az.names)
+  availability_zone = data.aws_availability_zones.az.names[count.index]
+}

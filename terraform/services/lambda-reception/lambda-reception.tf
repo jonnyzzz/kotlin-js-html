@@ -2,6 +2,10 @@ variable "prefix" {}
 variable "stack" {}
 variable "s3_bucket_name" {}
 
+variable "ecs_cluster_name" { }
+variable "ecs_task_definition_arn" { }
+variable "ecs_task_subnets" { }
+
 output "lambda_arn" {
   value = aws_lambda_function.f.arn
 }
@@ -45,6 +49,17 @@ data "aws_iam_policy_document" "permissions" {
 
     effect  = "Allow"
   }
+
+  statement {
+    //User: arn:aws:sts::754745079939:assumed-role/kt-js-hackathon21_iam/kt-js-hackathon21_reception_lambda is not authorized to perform: iam:PassRole on resource: arn:aws:iam::754745079939:role/kt-js-hackathon21_builder_exec_v1
+
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
+      "ecs:*",
+      "iam:PassRole",
+    ]
+  }
 }
 
 resource "aws_iam_role" "iam" {
@@ -73,7 +88,10 @@ resource "aws_lambda_function" "f" {
 
   environment {
     variables = {
-      KTJS_BUCKET = var.s3_bucket_name
+      KTJS_BUCKET = var.s3_bucket_name,
+      KTJS_ECS_CLUSTER_NAME = var.ecs_cluster_name,
+      KTJS_ECS_TASK_DEFINITION = var.ecs_task_definition_arn,
+      KTJS_ECS_TASK_SUBNETS = var.ecs_task_subnets,
     }
   }
 
