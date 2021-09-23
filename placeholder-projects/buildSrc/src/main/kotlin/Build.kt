@@ -84,14 +84,11 @@ object Build {
 
   private fun noArgsFunctionCallRegex(fName: String) = Regex("$fName[ \\t]*[(][ \\t]*[)]")
 
-  private fun getInputFile() = getEnv(envName = "INPUT_FILE").let(::File).let {
-    if (it.isDirectory) throw IllegalStateException("Input file $it is a directory")
-    if (!it.exists()) throw IllegalStateException("Input file $it doesn't exist")
-    it.absolutePath
-  }
+  private fun getInputFile() = getEnv(envName = "INPUT_FILE")?.let(::File)
+    ?.takeIf { !it.isDirectory && it.exists() }?.let { it.absolutePath }
 
   private fun Project.manageInputFile(sourceSet: String, buildStatus: BuildStatus) {
-    val inputScript = getInputFile().let(::File).readText()
+    val inputScript = getInputFile()?.let(::File)?.readText() ?: return
 
     buildStatus.project = determinePlaceholderProject(inputScript)
     if (buildStatus.project != name) return
@@ -111,12 +108,9 @@ object Build {
     return text.indexOf("\n", startIndex = lastImport) + 1
   }
 
-  private fun getOutputDir(): String = getEnv(envName = "OUTPUT_DIR", defaultValue = "./").let { File(it) }.let {
-    if (!it.isDirectory) throw IllegalStateException("Output dir $it is not a directory")
-    if (!it.exists()) throw IllegalStateException("Output dir $it doesn't exist")
-    it.absolutePath
-  }
+  private fun getOutputDir(): String = getEnv(envName = "OUTPUT_DIR", defaultValue = "./")?.let(::File)
+    ?.takeIf { it.isDirectory && it.exists() }?.let { it.absolutePath }
+    ?: throw IllegalStateException("OUTPUT_DIR not defined")
 
-  private fun getEnv(envName: String, defaultValue: String? = null): String =
-    System.getenv(envName) ?: defaultValue ?: throw IllegalStateException("Not default value for $envName")
+  private fun getEnv(envName: String, defaultValue: String? = null): String? = System.getenv(envName) ?: defaultValue
 }
