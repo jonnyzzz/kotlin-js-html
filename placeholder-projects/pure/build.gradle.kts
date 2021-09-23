@@ -5,11 +5,15 @@ plugins {
 }
 
 kotlin {
-  js(LEGACY) {
+  js(IR) {
+    useCommonJs()
     binaries.executable()
     browser {
       commonWebpackConfig {
         cssSupport.enabled = true
+        sourceMaps = true
+        showProgress = true
+        progressReporter = true
       }
     }
   }
