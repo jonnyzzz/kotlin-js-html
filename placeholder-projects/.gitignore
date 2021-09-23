@@ -9,3 +9,6 @@ compose.js
 compose.js.map
 
 wrapper
+
+.DS_Store
+
