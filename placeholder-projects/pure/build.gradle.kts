@@ -1,4 +1,5 @@
 import Build.addSubprojectsTasks
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
 plugins {
   kotlin("js")
@@ -16,8 +17,8 @@ kotlin {
       }
     }
   }
-  val mainSourceSet = sourceSets.getByName("main")
-  project.addSubprojectsTasks(mainSourceSet)
+  val mainSourceSet: KotlinSourceSet = sourceSets.getByName("main")
+  addSubprojectsTasks(mainSourceSet)
 }
 
 dependencies {

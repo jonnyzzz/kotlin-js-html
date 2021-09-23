@@ -9,11 +9,10 @@ subprojects {
   version = "1.0"
 }
 
-val subprojectsTasks = project.subprojects.map { ":${it.name}:fullDistBuild" }
+val fullDistBuild by tasks.creating {
 
-subprojectsTasks.zipWithNext()
-  .forEach { (fst, snd) -> project.tasks.getByPath(fst).mustRunAfter(project.tasks.getByPath(snd)) }
 
-tasks.register<GradleBuild>("fullDistBuild") {
-  tasks = subprojectsTasks
+  project.subprojects.map {
+    dependsOn(":${it.path}:fullDistBuildInner")
+  }
 }

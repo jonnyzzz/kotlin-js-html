@@ -18,18 +18,19 @@ object Build {
     val distTask = getDistTaskName(sourceSet)
     val buildStatus = BuildStatus()
 
-    tasks.register("manageInputFile") {
+    val manageInputFileTask = tasks.register("manageInputFile") {
       doFirst {
         manageInputFile(sourceSet.name, buildStatus)
       }
     }
 
     tasks.getByName(distTask) {
-      mustRunAfter("manageInputFile")
+      dependsOn(manageInputFileTask)
     }
 
-    tasks.register("copyResult") {
+    val copyResultTask = tasks.register("copyResult") {
       dependsOn(distTask)
+
       doFirst {
         if (buildStatus.project != project.name) return@doFirst
 
@@ -40,10 +41,10 @@ object Build {
       }
     }
 
-    tasks.register("fullDistBuild") {
-      dependsOn("manageInputFile")
+    tasks.register("fullDistBuildInner") {
+      dependsOn(manageInputFileTask)
       dependsOn(distTask)
-      dependsOn("copyResult")
+      dependsOn(copyResultTask)
     }
   }
 
@@ -85,7 +86,7 @@ object Build {
   private fun noArgsFunctionCallRegex(fName: String) = Regex("$fName[ \\t]*[(][ \\t]*[)]")
 
   private fun getInputFile() = getEnv(envName = "INPUT_FILE")?.let(::File)
-    ?.takeIf { !it.isDirectory && it.exists() }?.let { it.absolutePath }
+    ?.takeIf { !it.isDirectory && it.exists() }?.absolutePath
 
   private fun Project.manageInputFile(sourceSet: String, buildStatus: BuildStatus) {
     val inputScript = getInputFile()?.let(::File)?.readText() ?: return
@@ -109,7 +110,7 @@ object Build {
   }
 
   private fun getOutputDir(): String = getEnv(envName = "OUTPUT_DIR", defaultValue = "./")?.let(::File)
-    ?.takeIf { it.isDirectory && it.exists() }?.let { it.absolutePath }
+    ?.takeIf { it.isDirectory && it.exists() }?.absolutePath
     ?: throw IllegalStateException("OUTPUT_DIR not defined")
 
   private fun getEnv(envName: String, defaultValue: String? = null): String? = System.getenv(envName) ?: defaultValue
