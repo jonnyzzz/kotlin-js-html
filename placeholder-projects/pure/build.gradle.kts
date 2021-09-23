@@ -1,5 +1,4 @@
 import Build.addSubprojectsTasks
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
 plugins {
   kotlin("js")

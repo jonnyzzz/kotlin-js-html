@@ -1,11 +1,9 @@
 import org.gradle.api.Named
 import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.tasks.Sync
-import org.gradle.kotlin.dsl.configure
+import org.gradle.api.tasks.Copy
 import java.io.File
 
-data class BuildStatus(var project: String? = null, var dependencies: List<String> = emptyList())
+data class BuildStatus(val dependencies: MutableList<String> = mutableListOf())
 
 object Build {
 
@@ -17,38 +15,36 @@ object Build {
 
   private val DEPENDENCY_REGEX = Regex("useNpmPackage[ \\t]*[(][ \\t]*\"(?:[^\"\\\\]|\\\\.)*\"[ \\t]*[)]")
 
-  fun Project.addSubprojectsTasks(sourceSet: Named, distTask: String) {
+  fun Project.addSubprojectsTasks(sourceSet: Named, distributionTaskName: String) {
     val fullDistBuildInnerTask = tasks.register("fullDistBuildInner")
     if (!isRelevantProject()) return
 
     val buildStatus = BuildStatus()
 
-    val manageInputFileTask = tasks.register("manageInputFile") {
+    tasks.register("manageInputFile") {
       doFirst {
         manageInputFile(sourceSet.name, buildStatus)
       }
     }
 
-    tasks.getByName(distTask) {
-      dependsOn(manageInputFileTask)
+    tasks.getByName(distributionTaskName) {
+      dependsOn("${project.path}:manageInputFile")
     }
 
-    val copyResultTask = tasks.register("copyResult", Sync::class.java) {
-      dependsOn(distTask)
+    tasks.register("copyResult", Copy::class.java) {
+      dependsOn("${project.path}:$distributionTaskName")
 
-      from(File(buildDir, "distributions").resolve("$name.js"))
-      from(File(buildDir, "distributions").resolve("$name.js.map"))
+      from(File(buildDir, "distributions").resolve("${project.name}.js"))
+      from(File(buildDir, "distributions").resolve("${project.name}.js.map"))
       into(getOutputDir())
     }
 
     fullDistBuildInnerTask.configure {
-      dependsOn(manageInputFileTask)
-      dependsOn(distTask)
-      dependsOn(copyResultTask)
+      dependsOn("${project.path}:copyResult")
+      dependsOn("${project.path}:$distributionTaskName")
+      dependsOn("${project.path}:manageInputFile")
     }
   }
-
-  fun Project.getOutputFileName(): String = "script.js"
 
   private fun determinePlaceholderProject(content: String): String = when {
     COMPOSE_REGEX.containsMatchIn(content) -> "compose"
@@ -67,10 +63,12 @@ object Build {
         .dropLastWhile(Char::isWhitespace)
     }.toList()
 
-  private fun modifyInputFile(content: String) =
-    content.let(::wrapInMainCallIfNeeded).let(::removeProjectDefinition)
+  private fun Project.modifyInputFile(content: String) =
+    content.let { wrapInMainCallIfNeeded(it) }.let { removeProjectDefinition(it) }.let { addImports(it) }
 
-  private fun File.overwriteCopyTo(target: File) = copyTo(target, overwrite = true)
+  private fun Project.addImports(content: String) =
+    Dependencies.imports.getOrDefault(name, listOf())
+      .joinToString(separator = "\n", postfix = "\n$content") { "import $it" }
 
   private fun wrapInMainCallIfNeeded(content: String): String =
     if (MAIN_REGEX.containsMatchIn(content)) content
@@ -87,37 +85,24 @@ object Build {
   private fun getInputFile() = getEnv(envName = "INPUT_FILE")?.let(::File)
     ?.takeIf { !it.isDirectory && it.exists() }?.absolutePath
 
-  fun Project.isRelevantProject() : Boolean {
+  fun Project.isRelevantProject(): Boolean {
     val inputScript = getInputFile()?.let(::File)?.readText() ?: return false
 
-    val projName = determinePlaceholderProject(inputScript)
-    println("Selected project name: $projName")
-    return projName == this.name
+    val projectName = determinePlaceholderProject(inputScript)
+    return projectName == name
   }
 
   private fun Project.manageInputFile(sourceSet: String, buildStatus: BuildStatus) {
     val inputScript = getInputFile()?.let(::File)?.readText() ?: return
-
-    buildStatus.project = determinePlaceholderProject(inputScript)
-    if (buildStatus.project != name) return
-
-    buildStatus.dependencies = extractAllDependencies(inputScript)
+    buildStatus.dependencies += extractAllDependencies(inputScript)
     val placeholderFile = layout.projectDirectory.file("src/$sourceSet/kotlin/Script.kt").asFile
-    val inputText = placeholderFile.readText()
-    val startIndex = firstIndexAfterImports(inputText)
-    val modifiedInputScript = modifyInputFile(inputScript)
-    val resultScript = inputText.replaceRange(startIndex, inputText.length, "\n$modifiedInputScript")
+    val resultScript = modifyInputFile(inputScript)
     placeholderFile.writeText(resultScript)
   }
 
-  private fun firstIndexAfterImports(text: String): Int {
-    val lastImport = text.lastIndexOf("import")
-    if (lastImport == -1) return 0
-    return text.indexOf("\n", startIndex = lastImport) + 1
-  }
-
   private fun getOutputDir(): String {
-    val let = getEnv(envName = "OUTPUT_DIR", defaultValue = "./")?.let(::File)?.absoluteFile ?: throw IllegalStateException("OUTPUT_DIR not defined")
+    val let = getEnv(envName = "OUTPUT_DIR", defaultValue = "./")?.let(::File)?.absoluteFile
+      ?: throw IllegalStateException("OUTPUT_DIR not defined")
     let.mkdirs()
     return let.absolutePath
   }
