@@ -109,7 +109,7 @@ func main() {
 
 		resultFiles = append(resultFiles, EcsDoneResultFile{
 			BucketKey: cacheBucketResultKey,
-			CdnUrl:    GetCdnUrlBase() + "/" + cacheBucketResultKey,
+			CdnUrl:    GetCdnUrlBase() + "/get/" + cacheBucketResultKey,
 		})
 	}
 
