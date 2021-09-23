@@ -1,0 +1,1 @@
+../aws-reception-lambda/settings-reception.go
