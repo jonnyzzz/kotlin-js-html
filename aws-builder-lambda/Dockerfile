@@ -22,9 +22,9 @@ RUN mkdir -p /runner
 
 COPY build/runner /runner
 
-#RUN chmod a+x /runner/warmup.sh
-### this line adds ~750mb of data to the image
-#RUN /runner/warmup.sh
+RUN chmod a+x /runner/warmup.sh
+## this line adds ~750mb of data to the image
+RUN /runner/warmup.sh
 
 COPY build/lambda-builder /builder-runner/lambda-builder
 RUN chmod +x /builder-runner/lambda-builder
