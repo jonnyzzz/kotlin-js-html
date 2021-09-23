@@ -28,7 +28,6 @@ func RunGradle() error {
 	userHomeDir, _ := os.UserHomeDir()
 	log.Println("User Home is set to ", userHomeDir)
 
-	//cmd := exec.Command("sudo", "-H", "-u", "jonnyzzz", "bash", "-c", "cd /runner && ./gradlew stage")
 	cmd := exec.Command("bash", "--login", "-c",
 		"cd /runner && "+
 			"id $(whoami) && "+
