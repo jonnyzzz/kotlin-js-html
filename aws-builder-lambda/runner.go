@@ -59,11 +59,6 @@ func RunGradle(progressMessages chan []string) ([]string, error) {
 
 	cmd := exec.Command("bash", "--login", "-c",
 		"cd /runner && "+
-			"id $(whoami) && "+
-			"mount && "+
-			"ls -lah && "+
-			"whoami && "+
-			"df -h . && "+
 			"./gradlew fullDistBuild --stacktrace")
 
 	cmd.Dir = "/runner"
