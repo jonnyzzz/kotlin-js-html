@@ -54,8 +54,9 @@ func temporaryResponse(shaText string, reason string) (events.APIGatewayProxyRes
 	return events.APIGatewayProxyResponse{
 		Body: string(data),
 		Headers: map[string]string{
-			"Cache-Control": "no-cache, max-age=0",
-			"Content-Type":  "application/json; charset=UTF-8",
+			"Access-Control-Allow-Origin": "*",
+			"Cache-Control":               "no-cache, max-age=0",
+			"Content-Type":                "application/json; charset=UTF-8",
 			//"ETag":          fmt.Sprintf("temp-%s", uuid.NewString()),
 		},
 		StatusCode: 200,
@@ -83,8 +84,9 @@ func resultResponse(shaText string, payload []byte) (events.APIGatewayProxyRespo
 	return events.APIGatewayProxyResponse{
 		Body: string(message),
 		Headers: map[string]string{
-			"Cache-Control": "no-cache, max-age=0",
-			"Content-Type":  "application/json; charset=UTF-8",
+			"Cache-Control":               "no-cache, max-age=0",
+			"Content-Type":                "application/json; charset=UTF-8",
+			"Access-Control-Allow-Origin": "*",
 			//"ETag":          fmt.Sprintf("result-%s", shaText),
 		},
 		StatusCode: 200,
