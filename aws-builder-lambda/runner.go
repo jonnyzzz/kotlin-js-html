@@ -10,7 +10,32 @@ import (
 	"syscall"
 )
 
-func linesToChan(r io.Reader) {
+type OutputCollector struct {
+	buffer []string
+	mutex  *sync.Mutex
+}
+
+func NewOutputCollector() *OutputCollector {
+	return &OutputCollector{
+		mutex:  &sync.Mutex{},
+		buffer: make([]string, 0, 100),
+	}
+}
+
+func (r *OutputCollector) PushLine(line string) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	r.buffer = append(r.buffer, line)
+}
+
+func (r *OutputCollector) Results() []string {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	return r.buffer
+}
+
+func linesToChan(r io.Reader, collector *OutputCollector) {
 	bufReader := bufio.NewReader(r)
 	for {
 		line, _, err := bufReader.ReadLine()
@@ -21,10 +46,11 @@ func linesToChan(r io.Reader) {
 
 		logMessage := string(line)
 		log.Println("GRADLE: ", logMessage)
+		collector.PushLine(logMessage)
 	}
 }
 
-func RunGradle() error {
+func RunGradle() ([]string, error) {
 	userHomeDir, _ := os.UserHomeDir()
 	log.Println("User Home is set to ", userHomeDir)
 
@@ -65,14 +91,16 @@ func RunGradle() error {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	collector := NewOutputCollector()
+
 	go func() {
 		defer wg.Done()
-		linesToChan(stdoutPipe)
+		linesToChan(stdoutPipe, collector)
 	}()
 
 	go func() {
 		defer wg.Done()
-		linesToChan(stderrPipe)
+		linesToChan(stderrPipe, collector)
 	}()
 
 	wg.Wait()
@@ -94,5 +122,5 @@ func RunGradle() error {
 		log.Printf("cmd.Run() failed with %v\n", err)
 	}
 
-	return err
+	return collector.Results(), err
 }

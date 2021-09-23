@@ -52,13 +52,13 @@ func main() {
 	//shaText := base64.URLEncoding.EncodeToString(sha[:])
 	fmt.Printf("Kotlin Code hash = %s\n", shaText)
 
-	PublishS3PendingStatus(shaText, "starting")
+	PublishS3PendingStatus(shaText, "starting", []string{})
 
 	//TODO: include output logs to S3 file
-	err = RunGradle()
+	outputLines, err := RunGradle()
 
 	if err != nil {
-		PublishS3PendingStatus(shaText, "failed")
+		PublishS3PendingStatus(shaText, "failed", outputLines)
 		return
 	}
 
@@ -107,5 +107,5 @@ func main() {
 	}
 
 	fmt.Printf("Upload completed, returning successful result\n")
-	PublishS3PendingStatusWithFiles(shaText, "success", resultFiles)
+	PublishS3PendingStatusWithFiles(shaText, "success", resultFiles, outputLines)
 }

@@ -16,7 +16,7 @@ type RetryAfterTimeoutMessage struct {
 	Sha256        string              `json:"sha_256"`
 	Reason        string              `json:"reason"`
 	Files         []EcsDoneResultFile `json:"files"`
-	Output        string              `json:"log_output"`
+	Output        []string            `json:"log_output"`
 }
 
 func temporaryPayload(shaText string, reason string) []byte {
@@ -33,7 +33,7 @@ func temporaryPayload(shaText string, reason string) []byte {
 	return data
 }
 
-func finalPayload(shaText string, reason string, files []EcsDoneResultFile, logOutput string) []byte {
+func finalPayload(shaText string, reason string, files []EcsDoneResultFile, logOutput []string) []byte {
 	data, err := json.MarshalIndent(RetryAfterTimeoutMessage{
 		Type:          "final",
 		TimeoutMillis: 0,

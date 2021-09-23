@@ -7,14 +7,14 @@ import (
 	"log"
 )
 
-func PublishS3PendingStatus(shaText string, status string) {
-	PublishS3PendingStatusWithFiles(shaText, status, []EcsDoneResultFile{})
+func PublishS3PendingStatus(shaText string, status string, outputLines []string) {
+	PublishS3PendingStatusWithFiles(shaText, status, []EcsDoneResultFile{}, outputLines)
 }
 
-func PublishS3PendingStatusWithFiles(shaText string, status string, files []EcsDoneResultFile) {
+func PublishS3PendingStatusWithFiles(shaText string, status string, files []EcsDoneResultFile, outputLines []string) {
 	cacheBucketResultKey := GetCacheBucketResponsePath(shaText)
 
-	payload := finalPayload(shaText, status, files, "Not Implemented")
+	payload := finalPayload(shaText, status, files, outputLines)
 
 	_, err := s3Service.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(GetCacheBucketName()),
