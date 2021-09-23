@@ -36,7 +36,8 @@ object Build {
     val copyResultTask = tasks.register("copyResult", Sync::class.java) {
       dependsOn(distTask)
 
-      from(File(buildDir, "distributions"))
+      from(File(buildDir, "distributions").resolve("$name.js"))
+      from(File(buildDir, "distributions").resolve("$name.js.map"))
       into(getOutputDir())
     }
 

@@ -16,7 +16,7 @@ kotlin {
       }
     }
   }
-  val mainSourceSet: KotlinSourceSet = sourceSets.getByName("main")
+  val mainSourceSet = sourceSets.getByName("main")
   addSubprojectsTasks(mainSourceSet, "browserProductionWebpack")
 }
 
