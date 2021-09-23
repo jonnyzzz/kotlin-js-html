@@ -120,7 +120,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		return temporaryResponse(shaText, "Failed to start builder")
 	}
 
-	resultPayload := temporaryPayload(shaText, "Builder task scheduled")
+	resultPayload := temporaryPayload(shaText, "Builder task scheduled", []string{})
 	_, err = s3Service.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(cacheBucketName),
 		Key:    aws.String(cacheBucketResultKey),

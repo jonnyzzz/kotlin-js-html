@@ -15,6 +15,6 @@ func ApiGatewayResponseJson(data []byte) (events.APIGatewayProxyResponse, error)
 }
 
 func temporaryResponse(shaText string, reason string) (events.APIGatewayProxyResponse, error) {
-	data := temporaryPayload(shaText, reason)
+	data := temporaryPayload(shaText, reason, []string{})
 	return ApiGatewayResponseJson(data)
 }

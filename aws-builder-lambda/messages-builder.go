@@ -8,7 +8,19 @@ import (
 )
 
 func PublishS3PendingStatus(shaText string, status string, outputLines []string) {
-	PublishS3PendingStatusWithFiles(shaText, status, []EcsDoneResultFile{}, outputLines)
+	cacheBucketResultKey := GetCacheBucketResponsePath(shaText)
+
+	payload := temporaryPayload(shaText, status, outputLines)
+
+	_, err := s3Service.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String(GetCacheBucketName()),
+		Key:    aws.String(cacheBucketResultKey),
+		Body:   bytes.NewReader(payload),
+	})
+
+	if err != nil {
+		log.Panicf("Failed to write results to S3 to %s: %v\n", cacheBucketResultKey, err)
+	}
 }
 
 func PublishS3PendingStatusWithFiles(shaText string, status string, files []EcsDoneResultFile, outputLines []string) {

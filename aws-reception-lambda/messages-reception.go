@@ -19,12 +19,13 @@ type RetryAfterTimeoutMessage struct {
 	Output        []string            `json:"log_output"`
 }
 
-func temporaryPayload(shaText string, reason string) []byte {
+func temporaryPayload(shaText string, reason string, logOutput []string) []byte {
 	data, err := json.MarshalIndent(RetryAfterTimeoutMessage{
 		Type:          "retry-after-timeout",
 		TimeoutMillis: 777,
 		Sha256:        shaText,
 		Reason:        reason,
+		Output:        logOutput,
 	}, "", "  ")
 
 	if err != nil {
