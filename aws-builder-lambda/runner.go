@@ -32,7 +32,9 @@ func (r *OutputCollector) PushLine(line string) {
 func (r *OutputCollector) Results() []string {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	return r.buffer
+	c := make([]string, 0, 0)
+	copy(c, r.buffer)
+	return c
 }
 
 func linesToChan(r io.Reader, collector *OutputCollector) {
