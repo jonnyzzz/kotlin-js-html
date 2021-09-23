@@ -72,18 +72,6 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		},
 	})
 
-	//startedTask, err := ecsClient.StartTask(&ecs.StartTaskInput{
-	//	Cluster: aws.String(GetEcsClusterName()),
-	//
-	//  TaskDefinition: aws.String(GetEcsTaskDefinitionArn()),
-	//  NetworkConfiguration: &ecs.NetworkConfiguration{
-	//    AwsvpcConfiguration: &ecs.AwsVpcConfiguration{
-	//      AssignPublicIp: aws.String("ENABLED"),
-	//      Subnets: aws.StringSlice(GetEcsTaskSubnets()),
-	//    },
-	//  },
-	//})
-
 	if err != nil {
 		fmt.Printf("Failed to start ECS task: %v\n", err)
 	}
