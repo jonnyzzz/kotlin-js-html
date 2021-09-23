@@ -9,7 +9,7 @@
   }
 
   function getScriptWithNode(node) {
-    if (node === undefined || !isKotlinScriptNode(node)) {
+    if (!isKotlinScriptNode(node)) {
       return undefined;
     }
     return {
@@ -50,100 +50,135 @@
     }
   }
 
+  function addJBMonoFont() {
+    const linkGApis = document.createElement('link');
+    linkGApis.setAttribute('rel', 'preconnect');
+    linkGApis.setAttribute('href', 'https://fonts.googleapis.com');
+    document.head.appendChild(linkGApis);
+
+    const linkGStatic = document.createElement('link');
+    linkGStatic.setAttribute('rel', 'preconnect');
+    linkGStatic.setAttribute('href', 'https://fonts.gstatic.com');
+    linkGStatic.setAttribute('crossorigin', '');
+    document.head.appendChild(linkGStatic);
+
+    const stylesheet = document.createElement('link');
+    stylesheet.setAttribute('rel', 'stylesheet');
+    stylesheet.setAttribute('href', 'https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap');
+    document.head.appendChild(stylesheet);
+  }
+
   function addAnimationStyle() {
     const style = document.createElement('style');
     style.innerHTML = `
-        .lds-spinner {
-          color: official;
-          display: inline-block;
-          position: relative;
-          width: 80px;
-          height: 80px;
+        .lds-ellipsis {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 40px;
         }
-        .lds-spinner div {
-          transform-origin: 40px 40px;
-          animation: lds-spinner 1.2s linear infinite;
+        .lds-ellipsis div {
+            position: absolute;
+            top: 14px;
+            width: 13px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
         }
-        .lds-spinner div:after {
-          content: ' ';
-          display: block;
-          position: absolute;
-          top: 3px;
-          left: 37px;
-          width: 6px;
-          height: 18px;
-          border-radius: 20%;
-          background: #787878;
+        .lds-ellipsis div:nth-child(1) {
+            left: 8px;
+            animation: lds-ellipsis1 0.6s infinite;
         }
-        .lds-spinner div:nth-child(1) {
-          transform: rotate(0deg);
-          animation-delay: -1.1s;
+        .lds-ellipsis div:nth-child(2) {
+            left: 8px;
+            animation: lds-ellipsis2 0.6s infinite;
         }
-        .lds-spinner div:nth-child(2) {
-          transform: rotate(30deg);
-          animation-delay: -1s;
+        .lds-ellipsis div:nth-child(3) {
+            left: 32px;
+            animation: lds-ellipsis2 0.6s infinite;
         }
-        .lds-spinner div:nth-child(3) {
-          transform: rotate(60deg);
-          animation-delay: -0.9s;
+        .lds-ellipsis div:nth-child(4) {
+            left: 56px;
+            animation: lds-ellipsis3 0.6s infinite;
         }
-        .lds-spinner div:nth-child(4) {
-          transform: rotate(90deg);
-          animation-delay: -0.8s;
+        @keyframes lds-ellipsis1 {
+            0% {
+                transform: scale(0);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
-        .lds-spinner div:nth-child(5) {
-          transform: rotate(120deg);
-          animation-delay: -0.7s;
+        @keyframes lds-ellipsis3 {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(0);
+            }
         }
-        .lds-spinner div:nth-child(6) {
-          transform: rotate(150deg);
-          animation-delay: -0.6s;
+        @keyframes lds-ellipsis2 {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(24px, 0);
+            }
         }
-        .lds-spinner div:nth-child(7) {
-          transform: rotate(180deg);
-          animation-delay: -0.5s;
+        #kjs-background {
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+            border: white;
+            width: auto;
+            position: fixed;
+            right: 4px;
+            bottom: 4px;
         }
-        .lds-spinner div:nth-child(8) {
-          transform: rotate(210deg);
-          animation-delay: -0.4s;
-        }
-        .lds-spinner div:nth-child(9) {
-          transform: rotate(240deg);
-          animation-delay: -0.3s;
-        }
-        .lds-spinner div:nth-child(10) {
-          transform: rotate(270deg);
-          animation-delay: -0.2s;
-        }
-        .lds-spinner div:nth-child(11) {
-          transform: rotate(300deg);
-          animation-delay: -0.1s;
-        }
-        .lds-spinner div:nth-child(12) {
-          transform: rotate(330deg);
-          animation-delay: 0s;
-        }
-        @keyframes lds-spinner {
-          0% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-          }
+        #kjs-text {
+            font-family: 'JetBrains Mono', monospace;
+            color: white;
+            margin-right: 8px;
+            margin-left: 12px;
+            margin-top: 4px;
+            margin-bottom: 4px;
         }
         `;
     document.head.appendChild(style);
+  }
+
+  function div(id) {
+    const result = document.createElement('div');
+    result.setAttribute('id', id);
+    return result;
+  }
+
+  function infoTextDiv(text) {
+    const loadingBackground = div('kjs-background');
+    const loadingText = div('kjs-text');
+    loadingText.textContent = text;
+    loadingBackground.appendChild(loadingText);
+    return loadingBackground;
   }
 
   function addAnimationNode(node) {
     if (node === undefined) {
       return undefined;
     }
+    const loadingBackground = infoTextDiv('Loading');
+
     const loadingAnimation = document.createElement('div');
-    loadingAnimation.className = 'lds-spinner';
-    loadingAnimation.innerHTML = '<div></div>'.repeat(12);
-    node.replaceWith(loadingAnimation);
-    return loadingAnimation;
+    loadingAnimation.className = 'lds-ellipsis';
+    loadingAnimation.innerHTML = '<div></div>'.repeat(4);
+
+
+    loadingBackground.appendChild(loadingAnimation);
+    node.replaceWith(loadingBackground);
+    return loadingBackground;
   }
 
   function fileUrlToScriptNode(scriptSource) {
@@ -166,7 +201,6 @@
     if (!Array.isArray(scriptNodes)) {
       return;
     }
-    console.log(scriptNodes);
     const parentNode = loadingNode.parentNode;
     scriptNodes.forEach((node) => parentNode.insertBefore(node, loadingNode));
     parentNode.removeChild(loadingNode);
@@ -194,17 +228,14 @@
         setTimeout(() => postForCompiledScript(script, node), response.timeout_millis);
         return;
       }
-      if (response.type === 'result' && 'object' === typeof response.results) {
-        if (response.results.status !== 'success') {
-          console.log('Error status received - probably compilation error');
-          console.log(response);
-          // TODO show to user
+      if (response.type === 'final') {
+        if (response.reason !== 'success') {
+          throw 'Error status received - compilation error';
         }
-        if (!Array.isArray(response.results.files)) {
-          console.log('Invalid data received - should receive array');
-          // TODO show to user
+        if (!Array.isArray(response.files)) {
+          throw 'Invalid data received - should receive array of result files';
         }
-        const scriptNodes = response.results.files
+        const scriptNodes = response.files
           .map(fileToJsResultFileUrl)
           .map(fileUrlToScriptNode)
           .filter((node) => node !== undefined);
@@ -215,23 +246,19 @@
     };
   }
 
-  function handleResponseError(response) {
-    console.log('RESPONSE ERROR');
-    console.log(response);
-    // TODO: show error status to user in place of loading animation
+  function handleResponseError(node) {
+    return (response) => node.replaceWith(infoTextDiv(response));
   }
 
-  function handleJsonError(error) {
-    console.log('JSON ERROR');
-    console.log(error);
-    // TODO: show error status to user in place of loading animation
+  function handleJsonError(node) {
+    return (error) => node.replaceWith(infoTextDiv(error));
   }
 
   function createResponseHandler(script, node) {
     return (response) => {
       response.json()
         .then(createJsonResponseHandler(script, node))
-        .catch(handleJsonError);
+        .catch(handleJsonError(node));
     };
   }
 
@@ -245,7 +272,7 @@
       body: script
     })
       .then(createResponseHandler(script, node))
-      .catch(handleResponseError);
+      .catch(handleResponseError(node));
   }
 
   const observer = new MutationObserver(handleDocumentMutation);
@@ -262,5 +289,6 @@
   const htmlNode = document.querySelector('html');
 
   addAnimationStyle();
+  addJBMonoFont();
   observer.observe(htmlNode, observerOptions);
 })();
