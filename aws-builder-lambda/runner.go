@@ -24,7 +24,7 @@ func linesToChan(r io.Reader) {
 	}
 }
 
-func RunGradle() {
+func RunGradle() error {
 	userHomeDir, _ := os.UserHomeDir()
 	log.Println("User Home is set to ", userHomeDir)
 
@@ -80,7 +80,6 @@ func RunGradle() {
 
 	err = cmd.Wait()
 	if err != nil {
-
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			// The program has exited with an exit code != 0
 
@@ -91,8 +90,10 @@ func RunGradle() {
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
 				log.Printf("Exit Status: %d", status.ExitStatus())
 			}
-
-			log.Println("cmd.Run() failed with %s\n", err)
 		}
+
+		log.Printf("cmd.Run() failed with %v\n", err)
 	}
+
+	return err
 }
