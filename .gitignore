@@ -2,3 +2,4 @@
 build
 build-local
 generated_*
+.DS_Store
