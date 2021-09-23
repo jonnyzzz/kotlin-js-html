@@ -101,8 +101,6 @@ func RunGradle(progressMessages chan []string) ([]string, error) {
 		linesToChan(stderrPipe, collector)
 	}()
 
-	wg.Wait()
-
 	isPumpRunning := true
 	go func() {
 		defer func() {
@@ -118,11 +116,11 @@ func RunGradle(progressMessages chan []string) ([]string, error) {
 			select {
 			case progressMessages <- collector.Results():
 			default:
-				return
 			}
 		}
 	}()
 
+	wg.Wait()
 	err = cmd.Wait()
 
 	isPumpRunning = false
