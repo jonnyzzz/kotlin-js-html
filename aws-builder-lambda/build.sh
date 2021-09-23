@@ -9,7 +9,12 @@ mkdir -p build/project || true
 
 ## copy placeholder
 cp -R "../placeholder-projects" "build/runner"
-
+rm -rf "build/runner/.idea" || true
+rm -rf "build/runner/.gradle" || true
+rm -rf "build/runner/*/.gradle" || true
+rm -rf "build/runner/build" || true
+rm -rf "build/runner/*/build" || true
+rm -rf "build/runner/wrapper" || true
 
 go version
 

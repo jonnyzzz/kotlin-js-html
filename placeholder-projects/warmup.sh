@@ -19,7 +19,8 @@ chmod +x ./gradlew
     kotlinNpmCachesSetup \
     kotlinNpmInstall \
     kotlinYarnSetup \
-    fullDistBuild
+    fullDistBuild \
+    assemble
 
 ./gradlew --stop
 
