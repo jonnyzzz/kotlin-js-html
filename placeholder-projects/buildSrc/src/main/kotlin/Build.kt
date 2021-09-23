@@ -115,9 +115,11 @@ object Build {
     return text.indexOf("\n", startIndex = lastImport) + 1
   }
 
-  private fun getOutputDir(): String = getEnv(envName = "OUTPUT_DIR", defaultValue = "./")?.let(::File)
-    ?.takeIf { it.isDirectory && it.exists() }?.absolutePath
-    ?: throw IllegalStateException("OUTPUT_DIR not defined")
+  private fun getOutputDir(): String {
+    val let = getEnv(envName = "OUTPUT_DIR", defaultValue = "./")?.let(::File)?.absoluteFile ?: throw IllegalStateException("OUTPUT_DIR not defined")
+    let.mkdirs()
+    return let.absolutePath
+  }
 
   private fun getEnv(envName: String, defaultValue: String? = null): String? = System.getenv(envName) ?: defaultValue
 }
