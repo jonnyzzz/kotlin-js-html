@@ -74,6 +74,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 
 	if err != nil {
 		fmt.Printf("Failed to start ECS task: %v\n", err)
+		return temporaryResponse(shaText, "Failed to start builder")
 	}
 
 	fmt.Printf("Started ECS task: %v\n", startedTask.GoString())
