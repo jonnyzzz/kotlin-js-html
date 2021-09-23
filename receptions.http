@@ -1,5 +1,6 @@
 POST https://kotlin-html.sandbox.intellij.net/reception
 Content-Type: text/kotlin
+X-KT-JS-REBUILD: please
 
 println("Hello")
 

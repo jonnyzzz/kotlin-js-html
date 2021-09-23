@@ -23,5 +23,5 @@ func GetEcsTaskSubnets() []string {
 }
 
 func GetCacheBucketResponsePath(sha string) string {
-	return "v1/" + sha + "/result.js"
+	return "v1/" + sha + "/result.json"
 }

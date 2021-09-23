@@ -6,6 +6,26 @@ import (
 	"log"
 )
 
+type EcsPendingResult struct {
+	Type   string `json:"type"`
+	Status string `json:"status"`
+	TaskId string `json:"task_id"`
+}
+
+func GeneratePendingMessage(status string, taskId string) []byte {
+	data, err := json.MarshalIndent(EcsPendingResult{
+		Type:   "retry-after-timeout",
+		Status: status,
+		TaskId: taskId,
+	}, "", "  ")
+
+	if err != nil {
+		log.Panic("Failed to serialize retry message", err.Error(), err)
+	}
+
+	return data
+}
+
 type RetryAfterTimeoutMessage struct {
 	Type          string `json:"type"`
 	TimeoutMillis int    `json:"timeout_millis"`

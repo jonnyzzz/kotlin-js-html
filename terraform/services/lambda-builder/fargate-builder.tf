@@ -75,7 +75,7 @@ resource "aws_ecs_task_definition" "builder" {
   container_definitions = <<DEFINITION
 [
   {
-    "name": "${var.prefix}-ktjs-builder-${var.flavour}",
+    "name": "builder",
     "image": "${aws_ecr_repository.ecr.repository_url}:${local.image_tag}",
     "essential": true,
     "logConfiguration": {
