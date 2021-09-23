@@ -61,7 +61,7 @@ func RunGradle() ([]string, error) {
 			"ls -lah && "+
 			"whoami && "+
 			"df -h . && "+
-			"./gradlew fullDistBuild")
+			"./gradlew fullDistBuild --stacktrace")
 
 	cmd.Dir = "/runner"
 
