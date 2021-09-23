@@ -1,9 +1,3 @@
-import Build.determinePlaceholderProject
-import Build.extractAllDependencies
-import Build.modifyInputFile
-import Build.readInputFile
-import Build.writeInputFile
-
 subprojects {
   repositories {
     google()

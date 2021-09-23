@@ -47,29 +47,25 @@ object Build {
     }
   }
 
-  fun determinePlaceholderProject(content: String): String = when {
+  private fun determinePlaceholderProject(content: String): String = when {
     COMPOSE_REGEX.containsMatchIn(content) -> "compose"
     REACT_REGEX.containsMatchIn(content) -> "react"
     else -> "pure"
   }
 
-  fun extractAllDependencies(content: String): List<String> =
+  private fun extractAllDependencies(content: String): List<String> =
     DEPENDENCY_REGEX.findAll(content).map { result ->
       content.substring(result.range)
-        .drop("useNpmPackage".length)
+        .removePrefix("useNpmPackage")
         .dropWhile(Char::isWhitespace)
-        .drop("(".length)
+        .removePrefix("(")
         .dropWhile(Char::isWhitespace)
-        .dropLast(")".length)
+        .removeSuffix(")")
         .dropLastWhile(Char::isWhitespace)
     }.toList()
 
-  fun modifyInputFile(content: String) =
+  private fun modifyInputFile(content: String) =
     content.let(::wrapInMainCallIfNeeded).let(::removeProjectDefinition)
-
-  fun readInputFile(): String = getInputFile().let(::File).readText()
-
-  fun writeInputFile(content: String) = getInputFile().let(::File).writeText(content)
 
   private fun getDistTaskName(sourceSet: Named): String =
     (sourceSet.name.dropLastWhile { it.isLowerCase() }.dropLast(1) + "BrowserDistribution").decapitalize()
