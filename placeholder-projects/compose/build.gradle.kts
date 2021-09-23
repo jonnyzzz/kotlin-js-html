@@ -1,4 +1,5 @@
 import Build.addSubprojectsTasks
+import Build.getOutputFileName
 
 plugins {
   kotlin("multiplatform")
@@ -13,7 +14,7 @@ kotlin {
       webpackTask {
         cssSupport.enabled = true
         sourceMaps = true
-        outputFileName = "script.js"
+        outputFileName = getOutputFileName()
       }
     }
   }

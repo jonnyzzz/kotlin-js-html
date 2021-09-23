@@ -48,6 +48,8 @@ object Build {
     }
   }
 
+  fun Project.getOutputFileName(): String = "script.js"
+
   private fun determinePlaceholderProject(content: String): String = when {
     COMPOSE_REGEX.containsMatchIn(content) -> "compose"
     REACT_REGEX.containsMatchIn(content) -> "react"

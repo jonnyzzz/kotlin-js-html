@@ -1,5 +1,5 @@
 import Build.addSubprojectsTasks
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import Build.getOutputFileName
 
 plugins {
   kotlin("js")
@@ -13,12 +13,12 @@ kotlin {
       commonWebpackConfig {
         cssSupport.enabled = true
         sourceMaps = true
-        outputFileName = "script.js"
+        outputFileName = getOutputFileName()
       }
     }
   }
-  val mainSourceSet: KotlinSourceSet = sourceSets.getByName("main")
-  addSubprojectsTasks(mainSourceSet)
+  val mainSourceSet = sourceSets.getByName("main")
+  project.addSubprojectsTasks(mainSourceSet)
 }
 
 dependencies {

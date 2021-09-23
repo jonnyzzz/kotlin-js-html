@@ -1,4 +1,5 @@
 import Build.addSubprojectsTasks
+import Build.getOutputFileName
 
 plugins {
   kotlin("js")
@@ -12,7 +13,7 @@ kotlin {
       commonWebpackConfig {
         cssSupport.enabled = true
         sourceMaps = true
-        outputFileName = "script.js"
+        outputFileName = getOutputFileName()
       }
     }
   }
