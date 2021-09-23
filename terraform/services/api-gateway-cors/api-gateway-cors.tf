@@ -21,7 +21,7 @@ variable "origin" {
 
 variable "headers" {
   description = "List of permitted headers. Default headers are alway present unless discard_default_headers variable is set to true"
-  default     = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token"]
+  default     = ["Content-Type", ]
 }
 
 variable "discard_default_headers" {
@@ -31,13 +31,11 @@ variable "discard_default_headers" {
 
 locals {
   methodOptions  = "OPTIONS"
-  defaultHeaders = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token"]
+  defaultHeaders = ["Content-Type", ]
 
   methods = join(",", distinct(concat(var.methods, [local.methodOptions])))
   headers = var.discard_default_headers ? join(",", var.headers) : join(",", distinct(concat(var.headers, local.defaultHeaders)))
 }
-
-
 
 resource "aws_api_gateway_method" "cors_method" {
   rest_api_id   = var.api
