@@ -1,4 +1,9 @@
 
+locals {
+  static_cdn_domain = "static.${var.public_dns}"
+  static_cdn_base_url = "https://${local.static_cdn_domain}"
+}
+
 module "website" {
   source = "github.com/jetbrains-infra/terraform-aws-static-website?ref=0.0.10"
 
@@ -13,7 +18,7 @@ module "website" {
   }
 
   route53_zone_name = var.public_dns_zone_part
-  domain_name       = "static.${var.public_dns}"
+  domain_name       = local.static_cdn_domain
   website_name      = "kotlin-js-html-hackathon21-${local.stack}"
 }
 

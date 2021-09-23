@@ -14,7 +14,7 @@ type EcsPendingResult struct {
 
 func GeneratePendingMessage(status string, taskId string) []byte {
 	data, err := json.MarshalIndent(EcsPendingResult{
-		Type:   "retry-after-timeout",
+		Type:   "pending",
 		Status: status,
 		TaskId: taskId,
 	}, "", "  ")

@@ -10,6 +10,26 @@ resource "aws_ecs_cluster" "cluster" {
   }
 }
 
+resource "aws_iam_role" "task_run_role" {
+  name = "${var.prefix}_builder_run_${var.flavour}"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_role" "task_exec_role" {
   name = "${var.prefix}_builder_exec_${var.flavour}"
 
@@ -28,6 +48,30 @@ resource "aws_iam_role" "task_exec_role" {
   ]
 }
 EOF
+}
+
+data "aws_iam_policy_document" "task_run_role_policy" {
+  statement {
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject",
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.s3_bucket_name}",
+      "arn:aws:s3:::${var.s3_bucket_name}/*",
+    ]
+
+    effect = "Allow"
+  }
+}
+
+resource "aws_iam_role_policy" "task_run_role_policy" {
+  name = "${var.prefix}_builder_run_${var.flavour}"
+  role = aws_iam_role.task_run_role.id
+
+  policy = data.aws_iam_policy_document.task_run_role_policy.json
 }
 
 resource "aws_iam_role_policy" "task_exec_role_policy" {
@@ -50,21 +94,6 @@ data "aws_iam_policy_document" "task_exec_role_policy" {
     ]
     resources = ["*"]
   }
-
-  statement {
-    actions = [
-      "s3:ListBucket",
-      "s3:GetObject",
-      "s3:PutObject",
-    ]
-
-    resources = [
-      "arn:aws:s3:::${var.s3_bucket_name}",
-      "arn:aws:s3:::${var.s3_bucket_name}/*",
-    ]
-
-    effect = "Allow"
-  }
 }
 
 locals {
@@ -78,7 +107,7 @@ resource aws_cloudwatch_log_group logs {
 
 resource "aws_ecs_task_definition" "builder" {
   family                   = "${var.prefix}-builder-${var.flavour}"
-#  task_role_arn            = "${aws_iam_role.stepfunction_ecs_task_role.arn}"
+  task_role_arn            = aws_iam_role.task_run_role.arn
   execution_role_arn       = aws_iam_role.task_exec_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -99,7 +128,8 @@ resource "aws_ecs_task_definition" "builder" {
         }
     },
     "environment": [
-        {"name": "KTJS_BUCKET", "value": "${var.s3_bucket_name}"}
+        {"name": "KTJS_BUCKET", "value": "${var.s3_bucket_name}"},
+        {"name": "KTJS_CDN_BASE", "value": "${var.static_cdn_url_base}"}
     ]
   }
 ]

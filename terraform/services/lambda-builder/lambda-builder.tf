@@ -2,6 +2,7 @@ variable "prefix" {}
 variable "stack" {}
 variable "s3_bucket_name" {}
 variable "flavour" {}
+variable "static_cdn_url_base" {}
 
 locals {
   lambda_dir = abspath("${path.module}/../../../aws-builder-lambda")

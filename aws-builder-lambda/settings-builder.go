@@ -4,6 +4,10 @@ import (
 	"os"
 )
 
+func GetCdnUrlBase() string {
+	return os.Getenv("KTJS_CDN_BASE")
+}
+
 func GetCacheBucketName() string {
 	return os.Getenv("KTJS_BUCKET")
 }
@@ -19,6 +23,11 @@ func GetTaskInput() string {
 func GetCacheBucketResponsePath(sha string) string {
 	return "v1/" + sha + "/result.json"
 }
+
 func GetCacheBucketInputPath(sha string) string {
 	return "v1/" + sha + "/input.kt"
+}
+
+func GetCacheBucketResultFilePath(sha string, filename string) string {
+	return "v1/" + sha + "/build/" + filename
 }
