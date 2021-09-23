@@ -8,7 +8,7 @@ mkdir -p build || true
 mkdir -p build/project || true
 
 ## copy placeholder
-cp -R "../placeholder-projects/pure" "build/runner"
+cp -R "../placeholder-projects" "build/runner"
 
 
 go version
