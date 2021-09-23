@@ -16,6 +16,12 @@ export INPUT_FILE="$( pwd )/input-react" &&
 export OUTPUT_DIR="$( pwd )/" &&
 ./gradlew :react:stage
 ```
+and for `compose`:
+```
+export INPUT_FILE="$( pwd )/input-compose" &&
+export OUTPUT_DIR="$( pwd )/" &&
+./gradlew :compose:stage
+```
 
 As a result you will get `.js` and `.js.map` files in the specified `OUTPUT_DIR` which will have
 the same name as the placeholder project.
