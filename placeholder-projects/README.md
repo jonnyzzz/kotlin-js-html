@@ -23,6 +23,4 @@ export OUTPUT_DIR="$( pwd )/" &&
 ./gradlew fullDistBuild
 ```
 
-As a result you will get `.js` and `.js.map` files in the specified `OUTPUT_DIR` which will have
-the same name as the placeholder project.
-
+As a result you will get `script.js` and `script.js.map` files in the specified `OUTPUT_DIR`.
