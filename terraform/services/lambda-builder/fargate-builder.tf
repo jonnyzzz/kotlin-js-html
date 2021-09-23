@@ -128,7 +128,8 @@ resource "aws_ecs_task_definition" "builder" {
         }
     },
     "environment": [
-        {"name": "KTJS_BUCKET", "value": "${var.s3_bucket_name}"}
+        {"name": "KTJS_BUCKET", "value": "${var.s3_bucket_name}"},
+        {"name": "KTJS_CDN_BASE", "value": "${var.static_cdn_url_base}"}
     ]
   }
 ]

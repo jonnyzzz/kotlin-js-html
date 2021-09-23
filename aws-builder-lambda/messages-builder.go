@@ -8,17 +8,28 @@ import (
 	"log"
 )
 
+type EcsDoneResultFile struct {
+	BucketKey string `json:"key"`
+	CdnUrl    string `json:"cnd_url"`
+}
+
 type EcsDoneResult struct {
-	Type   string `json:"type"`
-	Status string `json:"status"`
+	Type   string              `json:"type"`
+	Status string              `json:"status"`
+	Files  []EcsDoneResultFile `json:"files"`
 }
 
 func PublishS3PendingStatus(shaText string, status string) {
+	PublishS3PendingStatusWithFiles(shaText, status, []EcsDoneResultFile{})
+}
+
+func PublishS3PendingStatusWithFiles(shaText string, status string, files []EcsDoneResultFile) {
 	cacheBucketResultKey := GetCacheBucketResponsePath(shaText)
 
 	payload, err := json.MarshalIndent(EcsDoneResult{
 		Type:   "builder-task",
 		Status: status,
+		Files:  files,
 	}, "", "  ")
 
 	if err != nil {

@@ -4,6 +4,10 @@ import (
 	"os"
 )
 
+func GetCdnUrlBase() string {
+	return os.Getenv("KTJS_CDN_BASE")
+}
+
 func GetCacheBucketName() string {
 	return os.Getenv("KTJS_BUCKET")
 }

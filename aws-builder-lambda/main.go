@@ -79,6 +79,7 @@ func main() {
 		fmt.Println("Generated file: ", file)
 	}
 
+	var resultFiles []EcsDoneResultFile
 	for _, file := range files {
 		fmt.Println("Uploading file: ", file)
 		_, filename := path.Split(file)
@@ -98,7 +99,13 @@ func main() {
 		if err != nil {
 			log.Panicf("Failed to write results to S3 to %s: %v\n", cacheBucketResultKey, err)
 		}
+
+		resultFiles = append(resultFiles, EcsDoneResultFile{
+			BucketKey: cacheBucketResultKey,
+			CdnUrl:    GetCdnUrlBase() + "/" + cacheBucketResultKey,
+		})
 	}
 
-	PublishS3PendingStatus(shaText, "success")
+	fmt.Printf("Upload completed, returning successful result\n")
+	PublishS3PendingStatusWithFiles(shaText, "success", resultFiles)
 }

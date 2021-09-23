@@ -1,6 +1,13 @@
+### Forces rebuild
 POST https://kotlin-html.sandbox.intellij.net/reception
 Content-Type: text/kotlin
 X-KT-JS-REBUILD: please
+
+println("Hello")
+
+### Incremental (usual way)
+POST https://kotlin-html.sandbox.intellij.net/reception
+Content-Type: text/kotlin
 
 println("Hello")
 
