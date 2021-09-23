@@ -54,8 +54,15 @@ func main() {
 
 	PublishS3PendingStatus(shaText, "starting", []string{})
 
+	outputChannel := make(chan []string, 100)
+	go func() {
+		for value := range outputChannel {
+			PublishS3PendingStatus(shaText, "running", value)
+		}
+	}()
+
 	//TODO: include output logs to S3 file
-	outputLines, err := RunGradle()
+	outputLines, err := RunGradle(outputChannel)
 
 	if err != nil {
 		PublishS3PendingStatus(shaText, "failed", outputLines)

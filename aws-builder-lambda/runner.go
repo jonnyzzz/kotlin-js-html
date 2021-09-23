@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"sync"
 	"syscall"
+	"time"
 )
 
 type OutputCollector struct {
@@ -52,7 +53,9 @@ func linesToChan(r io.Reader, collector *OutputCollector) {
 	}
 }
 
-func RunGradle() ([]string, error) {
+func RunGradle(progressMessages chan []string) ([]string, error) {
+	defer close(progressMessages)
+
 	userHomeDir, _ := os.UserHomeDir()
 	log.Println("User Home is set to ", userHomeDir)
 
@@ -106,6 +109,26 @@ func RunGradle() ([]string, error) {
 	}()
 
 	wg.Wait()
+
+	isPumpRunning := true
+	go func() {
+		defer func() {
+			recover()
+		}()
+
+		for {
+			time.Sleep(time.Second / 2)
+			if !isPumpRunning {
+				return
+			}
+
+			select {
+			case progressMessages <- collector.Results():
+			default:
+				return
+			}
+		}
+	}()
 
 	err = cmd.Wait()
 	if err != nil {
