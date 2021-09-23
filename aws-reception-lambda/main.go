@@ -120,10 +120,11 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		return temporaryResponse(shaText, "Failed to start builder")
 	}
 
+	resultPayload := temporaryPayload(shaText, "Builder task scheduled")
 	_, err = s3Service.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(cacheBucketName),
 		Key:    aws.String(cacheBucketResultKey),
-		Body:   bytes.NewReader(temporaryPayload(shaText, "Builder task scheduled")),
+		Body:   bytes.NewReader(resultPayload),
 	})
 
 	if err != nil {
@@ -132,7 +133,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	}
 
 	fmt.Printf("Started ECS task: %v\n", startedTask.GoString())
-	return temporaryResponse(shaText, "Building, please come back later")
+	return ApiGatewayResponseJson(resultPayload)
 }
 
 func main() {
