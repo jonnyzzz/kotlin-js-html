@@ -21,3 +21,6 @@ chmod +x ./gradlew
     kotlinYarnSetup \
     fullDistBuild
 
+./gradlew --stop
+
+
