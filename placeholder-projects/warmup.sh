@@ -18,5 +18,6 @@ chmod +x ./gradlew
     kotlinNodeJsSetup \
     kotlinNpmCachesSetup \
     kotlinNpmInstall \
-    kotlinYarnSetup
+    kotlinYarnSetup \
+    fullDistBuild
 

@@ -1,4 +1,4 @@
-import Build.addTasks
+import Build.addSubprojectsTasks
 
 plugins {
   kotlin("multiplatform")
@@ -7,8 +7,15 @@ plugins {
 
 kotlin {
   js(IR) {
-    browser()
+    useCommonJs()
     binaries.executable()
+    browser {
+      webpackTask {
+        cssSupport.enabled = true
+        sourceMaps = true
+        outputFileName = "script.js"
+      }
+    }
   }
   sourceSets {
     val jsMain by getting {
@@ -19,5 +26,5 @@ kotlin {
     }
   }
   val mainSourceSet = sourceSets.getByName("jsMain")
-  project.addTasks(mainSourceSet)
+  project.addSubprojectsTasks(mainSourceSet)
 }

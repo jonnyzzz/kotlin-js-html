@@ -1,4 +1,4 @@
-import Build.addTasks
+import Build.addSubprojectsTasks
 
 plugins {
   kotlin("js")
@@ -12,13 +12,12 @@ kotlin {
       commonWebpackConfig {
         cssSupport.enabled = true
         sourceMaps = true
-        showProgress = true
-        progressReporter = true
+        outputFileName = "script.js"
       }
     }
   }
   val mainSourceSet = sourceSets.getByName("main")
-  project.addTasks(mainSourceSet)
+  project.addSubprojectsTasks(mainSourceSet)
 }
 
 dependencies {
