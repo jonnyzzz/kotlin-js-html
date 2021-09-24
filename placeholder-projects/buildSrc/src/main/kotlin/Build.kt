@@ -1,6 +1,7 @@
 import org.gradle.api.Named
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 
 data class BuildStatus(val dependencies: MutableList<String> = mutableListOf())
@@ -21,10 +22,14 @@ object Build {
 
     val buildStatus = BuildStatus()
 
-    tasks.register("manageInputFile") {
+    val manageInputFileTask = tasks.register("manageInputFile") {
       doFirst {
         manageInputFile(sourceSet.name, buildStatus)
       }
+    }
+
+    tasks.withType(KotlinCompile::class.java) {
+      dependsOn(manageInputFileTask)
     }
 
     tasks.getByName("clean") {
