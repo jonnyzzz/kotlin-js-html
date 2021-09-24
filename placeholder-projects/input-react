@@ -51,12 +51,10 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
 }
 
 fun main() {
-  window.onload = {
-    render(document.getElementById("root")) {
-      child(Welcome::class) {
-        attrs {
-          name = "Kotlin/JS"
-        }
+  render(document.getElementById("root")) {
+    child(Welcome::class) {
+      attrs {
+        name = "Kotlin/JS"
       }
     }
   }
