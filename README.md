@@ -1,5 +1,9 @@
 # Kotlin/JS in HTML Project objectives
 
+## License
+
+Apache 2.0
+See the LICENSE for more details.
 
 ## Development Requirements:
 
