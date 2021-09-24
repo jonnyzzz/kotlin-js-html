@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pure Kotlin/JS sample</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&amp;display=swap">
+  <link href="jb.css" rel="stylesheet">
+
+  <script type="application/javascript" src="https://kotlin-html.sandbox.intellij.net/get/v1/shim.js"></script>
+</head>
+<body>
+<div id="main">
+  <div id="ctrl" class="flex-container">
+    <div class="ctrl-holder flex-container" style="margin-left: 0.4em">
+      <div class="ctrl"></div>
+    </div>
+    <div class="ctrl-holder flex-container">
+      <div class="ctrl"></div>
+    </div>
+    <div class="ctrl-holder flex-container">
+      <div class="ctrl"></div>
+    </div>
+  </div>
+  <div id="content">
+    <div id="root" style="zoom: 150%; -moz-transform: scale(1.5);">
+      <h1 style="margin: 2em">Hello Kotlin/JS in HTML World!</h1>
+    </div>
+  </div>
+</div>
+<script type="language/kotlin">
+
+@Serializable
+  data class HumanInSpace(
+    val craft: String,
+    val name: String
+  )
+
+  @Serializable
+  data class Space(
+    val number: Int,
+    val people: List<HumanInSpace>
+  )
+
+fun main() {
+  fetchJson<Space>("http://api.open-notify.org/astros.json") {
+   document.getElementById("content")?.append {
+     it.people.forEach { p ->
+        div {
+          h1 { + it.name }
+          + it.name
+        }
+      }
+    }
+  }
+}
+</script>
+</body>
+</html>
