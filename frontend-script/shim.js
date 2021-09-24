@@ -5,7 +5,8 @@
     if (node === undefined) {
       return false;
     }
-    return node.tagName === 'SCRIPT' && node.type === 'language/kotlin';
+    return node.tagName === 'SCRIPT' &&
+      (node.type === 'language/kotlin' || node.type === 'application/kotlin');
   }
 
   function getScriptWithNode(node) {
@@ -136,8 +137,8 @@
             border: white;
             width: auto;
             position: fixed;
-            right: 4px;
-            bottom: 4px;
+            right: 1em;
+            bottom: 1em;
         }
         #kjs-text {
             font-family: 'JetBrains Mono', monospace;
