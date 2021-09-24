@@ -154,6 +154,17 @@
             margin-left: 0.6em;
             margin-right: 0.6em;
         }
+        #kjs-close {
+            font-family: 'JetBrains Mono', monospace;
+            color: white;
+            font-size: 1em;
+            position: fixed;
+            right: 1em;
+            bottom: 248px;
+            padding-right: 12px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
         .kjs-log-line {
             font-family: 'JetBrains Mono', monospace;
             color: white;
@@ -202,6 +213,11 @@
       log.appendChild(node);
     })
     background.appendChild(log);
+
+    const close = div('kjs-close');
+    close.textContent = '[X]'
+    close.addEventListener('click', () => background.remove())
+    background.appendChild(close);
     return background;
   }
 
