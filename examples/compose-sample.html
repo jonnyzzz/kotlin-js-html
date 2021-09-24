@@ -42,7 +42,6 @@ data class Tube(
   var position: Int,
   val coordinates: List<Boolean>
 )
-
 data class GameFrame(
   val birdPos: Int,
   val tubes: List<Tube>,
@@ -56,7 +55,6 @@ interface Game {
   fun step()
   fun moveBirdUp()
 }
-
 class ComposeBirdGame : Game {
 
   companion object {
