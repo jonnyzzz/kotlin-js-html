@@ -44,18 +44,17 @@ fun fetchDynamic(url: String, use: (dynamic) -> dynamic) {
 
 fun main() = fetchDynamic("http://api.open-notify.org/astros.json") {
   document.getElementById("root")?.append {
-      h1 { +"People in Space" }
-      div {
-        it.people.forEach { p ->
-          div {
-              h2 { +p.name.toString() }
-              +p.craft.toString()
-          }
+    h1 { +"People in Space" }
+    div {
+      it.people.forEach { p ->
+        div {
+          h2 { +p.name.toString() }
+          +p.craft.toString()
         }
       }
+    }
   }
 }
-
 </script>
 </body>
 </html>
