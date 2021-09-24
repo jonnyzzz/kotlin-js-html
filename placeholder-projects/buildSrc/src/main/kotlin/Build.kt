@@ -27,8 +27,12 @@ object Build {
       }
     }
 
-    tasks.getByName(distributionTaskName) {
+    tasks.getByName("clean") {
       dependsOn("${project.path}:manageInputFile")
+    }
+
+    tasks.getByName(distributionTaskName) {
+      dependsOn("${project.path}:clean")
     }
 
     tasks.register("copyResult", Copy::class.java) {
@@ -42,6 +46,7 @@ object Build {
     fullDistBuildInnerTask.configure {
       dependsOn("${project.path}:copyResult")
       dependsOn("${project.path}:$distributionTaskName")
+      dependsOn("${project.path}:clean")
       dependsOn("${project.path}:manageInputFile")
     }
   }
