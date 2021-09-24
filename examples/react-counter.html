@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Kotlin/JS with React sample</title>
+  <meta charset="UTF-8">
+  <title>Kotlin/JS with React sample</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -44,26 +44,25 @@ import react.dom.div
 import react.dom.render
 
 fun renderOnLoad(elementId: String = "root", callback: () -> Unit = {}, handler: RBuilder.() -> Unit) {
-    val renderInRoot = { render(document.getElementById(elementId), callback, handler) }
-    if (document.readyState == DocumentReadyState.Companion.COMPLETE) renderInRoot()
-    else window.onload = { renderInRoot() }
+  val renderInRoot = { render(document.getElementById(elementId), callback, handler) }
+  if (document.readyState == DocumentReadyState.Companion.COMPLETE) renderInRoot()
+  else window.onload = { renderInRoot() }
 }
 
-
 fun main() = renderOnLoad {
-    child(functionalComponent<RProps> {
-        var state by useState(1)
-        div {
-            +"Now we have $state"
-            a {
-                attrs.onClickFunction = {
-                    it.stopPropagation()
-                    state += 1
-                }
-                +" ⬆️"
-            }
+  child(functionalComponent<RProps> {
+    var state by useState(1)
+    div {
+      +"Now we have $state"
+      a {
+        attrs.onClickFunction = {
+          it.stopPropagation()
+          state += 1
         }
-    })
+        +" ⬆️"
+      }
+    }
+  })
 }
 </script>
 </body>

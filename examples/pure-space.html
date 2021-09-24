@@ -26,36 +26,36 @@
   </div>
   <div id="content">
     <div id="root" style="zoom: 150%; -moz-transform: scale(1.5);">
-      <h1 style="margin: 2em">Hello Kotlin/JS in HTML World!</h1>
+      <h1 style="margin: 2em">Wait for Kotlin/JS Space People...</h1>
     </div>
   </div>
 </div>
 <script type="language/kotlin">
+import kotlinx.browser.document
+import kotlinx.browser.window
+import kotlinx.html.div
+import kotlinx.html.dom.append
+import kotlinx.html.h1
+import kotlinx.html.h2
 
-@kotlinx.serialization.Serializable
-data class HumanInSpace(
-  val craft: String,
-  val name: String
-)
+fun fetchDynamic(url: String, use: (dynamic) -> dynamic) {
+  window.fetch(url).then { it.json() }.then(use)
+}
 
-@kotlinx.serialization.Serializable
-data class Space(
-  val number: Int,
-  val people: List<HumanInSpace>
-)
-
-fun main() {
-  fetchJson<Space>("http://api.open-notify.org/astros.json") {
-   document.getElementById("content")?.append {
-     it.people.forEach { p ->
-        div {
-          h1 { + it.name }
-          + it.name
+fun main() = fetchDynamic("http://api.open-notify.org/astros.json") {
+  document.getElementById("root")?.append {
+      h1 { +"People in Space" }
+      div {
+        it.people.forEach { p ->
+          div {
+              h2 { +p.name.toString() }
+              +p.craft.toString()
+          }
         }
       }
-    }
   }
 }
+
 </script>
 </body>
 </html>
