@@ -148,13 +148,40 @@
             margin-top: 4px;
             margin-bottom: 4px;
         }
+        #kjs-log {
+            height: 256px;
+            overflow-y: auto;
+            margin-left: 0.6em;
+            margin-right: 0.6em;
+        }
+        .kjs-log-line {
+            font-family: 'JetBrains Mono', monospace;
+            color: white;
+            margin-right: 8px;
+            margin-left: 12px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+            font-size: 0.8em;
+        }
         `;
     document.head.appendChild(style);
+  }
+
+  function prepend(value, array) {
+    const newArray = array.slice();
+    newArray.unshift(value);
+    return newArray;
   }
 
   function div(id) {
     const result = document.createElement('div');
     result.setAttribute('id', id);
+    return result;
+  }
+
+  function divClass(c) {
+    const result = document.createElement('div');
+    result.setAttribute('class', c);
     return result;
   }
 
@@ -164,6 +191,18 @@
     loadingText.textContent = text;
     loadingBackground.appendChild(loadingText);
     return loadingBackground;
+  }
+
+  function infoLogDiv(textLinesArray) {
+    const background = div('kjs-background');
+    const log = div('kjs-log');
+    textLinesArray.forEach((txt) => {
+      const node = divClass('kjs-log-line');
+      node.textContent = txt;
+      log.appendChild(node);
+    })
+    background.appendChild(log);
+    return background;
   }
 
   function addAnimationNode(node) {
@@ -231,7 +270,7 @@
       }
       if (response.type === 'final') {
         if (response.reason !== 'success') {
-          throw 'Error status received - compilation error';
+          throw prepend('Compilation finished with failure:', response.log_output);
         }
         if (!Array.isArray(response.files)) {
           throw 'Invalid data received - should receive array of result files';
@@ -252,7 +291,13 @@
   }
 
   function handleJsonError(node) {
-    return (error) => node.replaceWith(infoTextDiv(error));
+    return (error) => {
+      if (Array.isArray(error)) {
+        node.replaceWith(infoLogDiv(error));
+        return;
+      }
+      node.replaceWith(infoTextDiv(String(error)));
+    };
   }
 
   function createResponseHandler(script, node) {
