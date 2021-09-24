@@ -16,14 +16,13 @@ kotlin {
       }
     }
   }
-  sourceSets {
-    val jsMain by getting {
-      dependencies {
-        implementation(compose.web.core)
-        implementation(compose.runtime)
-      }
+
+  val jsMain by sourceSets.getting {
+    dependencies {
+      implementation(compose.web.core)
+      implementation(compose.runtime)
+      implementation(project(":pure"))
     }
   }
-  val mainSourceSet = sourceSets.getByName("jsMain")
-  project.addSubprojectsTasks(mainSourceSet, "jsBrowserProductionWebpack")
+  project.addSubprojectsTasks(jsMain, "jsBrowserProductionWebpack")
 }

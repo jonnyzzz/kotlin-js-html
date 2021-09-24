@@ -11,6 +11,7 @@ pluginManagement {
     dependencies {
       classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21")
       classpath("org.jetbrains.compose:compose-gradle-plugin:1.0.0-alpha3")
+      classpath("org.jetbrains.kotlin:kotlin-serialization:1.5.21")
     }
   }
 }

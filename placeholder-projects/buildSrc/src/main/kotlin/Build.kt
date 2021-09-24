@@ -77,7 +77,7 @@ object Build {
     content.let { wrapInMainCallIfNeeded(it) }.let { removeProjectDefinition(it) }.let { addImports(it) }
 
   private fun Project.addImports(content: String) =
-    Dependencies.imports.getOrDefault(name, listOf())
+    Dependencies.getImportsFor(name)
       .joinToString(separator = "\n", postfix = "\n$content") { "import $it" }
 
   private fun wrapInMainCallIfNeeded(content: String): String =
