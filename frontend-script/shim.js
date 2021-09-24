@@ -221,6 +221,14 @@
     return background;
   }
 
+  function onWindowLoad(callback) {
+    if (document.readyState === 'complete') {
+      callback();
+    } else {
+      window.addEventListener("load", callback);
+    }
+  }
+
   function addAnimationNode(node) {
     if (node === undefined) {
       return undefined;
@@ -232,7 +240,7 @@
     loadingAnimation.innerHTML = '<div></div>'.repeat(4);
 
     loadingBackground.appendChild(loadingAnimation);
-    window.onload = function(){ document.body.appendChild(loadingBackground); };
+    onWindowLoad(() => document.body.appendChild(loadingBackground));
     node.remove();
     return loadingBackground;
   }
