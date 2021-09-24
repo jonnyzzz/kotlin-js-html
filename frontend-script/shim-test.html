@@ -8,6 +8,13 @@
 <body>
 <script type="language/kotlin">
     window.alert("This is a very test of Kotlin JS in HTML")
+
+    document.getElementById("content")!!.append {
+      div {
+        h1 { + "This is cool" }
+      }
+    }
 </script>
+<div id="content"></div>
 </body>
 </html>
