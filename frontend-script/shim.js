@@ -231,9 +231,9 @@
     loadingAnimation.className = 'lds-ellipsis';
     loadingAnimation.innerHTML = '<div></div>'.repeat(4);
 
-
     loadingBackground.appendChild(loadingAnimation);
-    node.replaceWith(loadingBackground);
+    window.onload = function(){ document.body.appendChild(loadingBackground); };
+    node.remove();
     return loadingBackground;
   }
 
