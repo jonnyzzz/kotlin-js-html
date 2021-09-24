@@ -1,11 +1,12 @@
-<html>
-<head>
-<script src="https://kotlin-html.sandbox.intellij.net/get/v1/shim.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head><script type="application/javascript" src="https://kotlin-html.sandbox.intellij.net/get/v1/shim.js"></script></head>
+<body>
+<div id="content"></div>
 <script type="language/kotlin">
-   render(document.getElementById("root")) {
-      h1 { +"This will be fun!" }
-   }
+  document.getElementById("content")?.append {
+    div { h1 { + "This is cool" } }
+  }
 </script>
-</head>
-<body><div id="root"></div></body>
+</body>
 </html>

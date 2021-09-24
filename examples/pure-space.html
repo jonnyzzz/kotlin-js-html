@@ -32,17 +32,17 @@
 </div>
 <script type="language/kotlin">
 
-@Serializable
-  data class HumanInSpace(
-    val craft: String,
-    val name: String
-  )
+@kotlinx.serialization.Serializable
+data class HumanInSpace(
+  val craft: String,
+  val name: String
+)
 
-  @Serializable
-  data class Space(
-    val number: Int,
-    val people: List<HumanInSpace>
-  )
+@kotlinx.serialization.Serializable
+data class Space(
+  val number: Int,
+  val people: List<HumanInSpace>
+)
 
 fun main() {
   fetchJson<Space>("http://api.open-notify.org/astros.json") {
