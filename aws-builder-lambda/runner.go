@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -135,6 +136,7 @@ func RunGradle(progressMessages chan []string) ([]string, error) {
 			// an ExitStatus() method with the same signature.
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
 				log.Printf("Exit Status: %d", status.ExitStatus())
+				collector.PushLine(fmt.Sprint("Process exited with code: ", status.ExitStatus()))
 			}
 		}
 

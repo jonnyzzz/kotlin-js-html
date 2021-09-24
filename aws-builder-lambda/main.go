@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 )
 
 func main() {
@@ -54,8 +55,13 @@ func main() {
 
 	PublishS3PendingStatus(shaText, "starting", []string{})
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	outputChannel := make(chan []string, 100)
 	go func() {
+		defer wg.Done()
+
 		for value := range outputChannel {
 			PublishS3PendingStatus(shaText, "running", value)
 		}
@@ -64,8 +70,10 @@ func main() {
 	//TODO: include output logs to S3 file
 	outputLines, err := RunGradle(outputChannel)
 
+	wg.Wait()
+
 	if err != nil {
-		PublishS3PendingStatus(shaText, "failed", outputLines)
+		PublishS3PendingStatusWithFiles(shaText, "failed", []EcsDoneResultFile{}, outputLines)
 		return
 	}
 
