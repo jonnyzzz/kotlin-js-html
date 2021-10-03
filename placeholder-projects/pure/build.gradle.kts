@@ -1,7 +1,7 @@
 import Build.addSubprojectsTasks
 
 plugins {
-  kotlin("js")
+  kotlin("multiplatform")
   kotlin("plugin.serialization")
 }
 
@@ -10,17 +10,20 @@ kotlin {
     useCommonJs()
     binaries.executable()
     browser {
-      commonWebpackConfig {
+      webpackTask {
         cssSupport.enabled = true
         sourceMaps = true
       }
     }
   }
-  val mainSourceSet = sourceSets.getByName("main")
-  addSubprojectsTasks(mainSourceSet, "browserProductionWebpack")
-}
 
-dependencies {
-  implementation("org.jetbrains.kotlinx:kotlinx-html:0.7.3")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+  val jsMain by sourceSets.getting
+
+  val addNpmDependencies = project.addSubprojectsTasks(jsMain, "jsBrowserProductionWebpack")
+
+  jsMain.dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-html:0.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+    addNpmDependencies()
+  }
 }

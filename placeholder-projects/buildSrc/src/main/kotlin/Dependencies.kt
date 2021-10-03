@@ -1,10 +1,10 @@
 object Dependencies {
 
-  fun getImportsFor(mode: String): List<String> {
-    if (mode == "compose") return (pure + compose).toList()
-    if (mode == "react") return (pure + react).toList()
-    return pure.toList()
-  }
+  fun getImportsFor(mode: String): List<String> = when (mode) {
+    "compose" -> pure + compose
+    "react" -> pure + react
+    else -> pure
+  }.toList()
 
   private val pure = setOf(
     "kotlinx.browser.*",

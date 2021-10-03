@@ -1,30 +1,34 @@
 import org.gradle.api.Named
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
+import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 
-data class BuildStatus(val dependencies: MutableList<String> = mutableListOf())
-
 object Build {
+
+  private const val DEPENDENCY_DECLARATION = "useNpmPackage"
+
+  private const val OUTPUT_DIR_ENV = "OUTPUT_DIR"
+
+  private const val WS = "[ \\t]*"
 
   private val REACT_REGEX = noArgsFunctionCallRegex("useReact")
 
   private val COMPOSE_REGEX = noArgsFunctionCallRegex("useCompose")
 
-  private val MAIN_REGEX = Regex("fun[ \\t]main[ \\t]*[(][ \\t]*[)]")
+  private val MAIN_REGEX = Regex("fun${WS}main${WS}[(]${WS}[)]")
 
-  private val DEPENDENCY_REGEX = Regex("useNpmPackage[ \\t]*[(][ \\t]*\"(?:[^\"\\\\]|\\\\.)*\"[ \\t]*[)]")
+  private val DEPENDENCY_REGEX = Regex("$DEPENDENCY_DECLARATION${WS}[(]${WS}\"(?:[^\"\\\\]|\\\\.)*\"${WS}[)]")
 
-  fun Project.addSubprojectsTasks(sourceSet: Named, distributionTaskName: String) {
+  fun Project.addSubprojectsTasks(sourceSet: Named, distributionTaskName: String): DependencyModifier {
     val fullDistBuildInnerTask = tasks.register("fullDistBuildInner")
-    if (!isRelevantProject()) return
-
-    val buildStatus = BuildStatus()
+    val inputScript = getInputFile()?.let(::File)?.readText() ?: return {}
+    if (!isRelevantProject(inputScript)) return {}
 
     val manageInputFileTask = tasks.register("manageInputFile") {
       doFirst {
-        manageInputFile(sourceSet.name, buildStatus)
+        manageInputFile(inputScript, sourceSet.name)
       }
     }
 
@@ -32,16 +36,16 @@ object Build {
       dependsOn(manageInputFileTask)
     }
 
-    tasks.getByName("clean") {
-      dependsOn("${project.path}:manageInputFile")
+    val cleanTask = tasks.getByName("clean") {
+      dependsOn(manageInputFileTask)
     }
 
-    tasks.getByName(distributionTaskName) {
-      dependsOn("${project.path}:clean")
+    val distributionTask = tasks.getByName(distributionTaskName) {
+      dependsOn(cleanTask)
     }
 
-    tasks.register("copyResult", Copy::class.java) {
-      dependsOn("${project.path}:$distributionTaskName")
+    val copyResultTask = tasks.register("copyResult", Copy::class.java) {
+      dependsOn(distributionTask)
 
       from(File(buildDir, "distributions").resolve("${project.name}.js"))
       from(File(buildDir, "distributions").resolve("${project.name}.js.map"))
@@ -49,10 +53,16 @@ object Build {
     }
 
     fullDistBuildInnerTask.configure {
-      dependsOn("${project.path}:copyResult")
-      dependsOn("${project.path}:$distributionTaskName")
-      dependsOn("${project.path}:clean")
-      dependsOn("${project.path}:manageInputFile")
+      dependsOn(copyResultTask)
+      dependsOn(distributionTask)
+      dependsOn(cleanTask)
+      dependsOn(manageInputFileTask)
+    }
+
+    return {
+      extractAllDependencies(inputScript).forEach {
+        implementation(npm(it.name, it.version))
+      }
     }
   }
 
@@ -62,23 +72,25 @@ object Build {
     else -> "pure"
   }
 
-  private fun extractAllDependencies(content: String): List<String> =
-    DEPENDENCY_REGEX.findAll(content).map { result ->
+  private fun extractAllDependencies(content: String): List<NpmDependency> =
+    DEPENDENCY_REGEX.findAll(content).mapNotNull { result ->
       content.substring(result.range)
-        .removePrefix("useNpmPackage")
+        .removePrefix(DEPENDENCY_DECLARATION)
         .dropWhile(Char::isWhitespace)
         .removePrefix("(")
         .dropWhile(Char::isWhitespace)
+        .removePrefix("\"")
         .removeSuffix(")")
         .dropLastWhile(Char::isWhitespace)
+        .removeSuffix("\"")
+        .let(::extractNpmDependency)
     }.toList()
 
   private fun Project.modifyInputFile(content: String) =
-    content.let { wrapInMainCallIfNeeded(it) }.let { removeProjectDefinition(it) }.let { addImports(it) }
+    addImports(removeProjectDefinition(wrapInMainCallIfNeeded(content)))
 
   private fun Project.addImports(content: String) =
-    Dependencies.getImportsFor(name)
-      .joinToString(separator = "\n", postfix = "\n$content") { "import $it" }
+    Dependencies.getImportsFor(name).joinToString(separator = "\n", postfix = "\n$content") { "import $it" }
 
   private fun wrapInMainCallIfNeeded(content: String): String =
     if (MAIN_REGEX.containsMatchIn(content)) content
@@ -90,32 +102,35 @@ object Build {
       .replace(REACT_REGEX, "\n")
       .replace(DEPENDENCY_REGEX, "\n")
 
-  private fun noArgsFunctionCallRegex(fName: String) = Regex("$fName[ \\t]*[(][ \\t]*[)]")
+  private fun noArgsFunctionCallRegex(fName: String) = Regex("$fName${WS}[(]${WS}[)]")
 
   private fun getInputFile() = getEnv(envName = "INPUT_FILE")?.let(::File)
     ?.takeIf { !it.isDirectory && it.exists() }?.absolutePath
 
-  fun Project.isRelevantProject(): Boolean {
-    val inputScript = getInputFile()?.let(::File)?.readText() ?: return false
-
+  private fun Project.isRelevantProject(inputScript: String): Boolean {
     val projectName = determinePlaceholderProject(inputScript)
     return projectName == name
   }
 
-  private fun Project.manageInputFile(sourceSet: String, buildStatus: BuildStatus) {
-    val inputScript = getInputFile()?.let(::File)?.readText() ?: return
-    buildStatus.dependencies += extractAllDependencies(inputScript)
+  private fun Project.manageInputFile(inputScript: String, sourceSet: String) {
     val placeholderFile = layout.projectDirectory.file("src/$sourceSet/kotlin/Script.kt").asFile
     val resultScript = modifyInputFile(inputScript)
     placeholderFile.writeText(resultScript)
   }
 
   private fun getOutputDir(): String {
-    val let = getEnv(envName = "OUTPUT_DIR", defaultValue = "./")?.let(::File)?.absoluteFile
-      ?: throw IllegalStateException("OUTPUT_DIR not defined")
+    val let = getEnv(envName = OUTPUT_DIR_ENV, defaultValue = "./")?.let(::File)?.absoluteFile
+      ?: throw IllegalStateException("$OUTPUT_DIR_ENV not defined")
     let.mkdirs()
     return let.absolutePath
   }
 
   private fun getEnv(envName: String, defaultValue: String? = null): String? = System.getenv(envName) ?: defaultValue
 }
+
+data class NpmDependency(val name: String, val version: String)
+
+typealias DependencyModifier = KotlinDependencyHandler.() -> Unit
+
+private fun extractNpmDependency(dependencyDefinition: String): NpmDependency? =
+  dependencyDefinition.split(":").takeIf { it.size == 2 }?.let { NpmDependency(it[0], it[1]) }

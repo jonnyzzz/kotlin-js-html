@@ -2,6 +2,7 @@ import Build.addSubprojectsTasks
 
 plugins {
   kotlin("multiplatform")
+  kotlin("plugin.serialization")
   id("org.jetbrains.compose")
 }
 
@@ -17,12 +18,14 @@ kotlin {
     }
   }
 
-  val jsMain by sourceSets.getting {
-    dependencies {
-      implementation(compose.web.core)
-      implementation(compose.runtime)
-      implementation(project(":pure"))
-    }
+  val jsMain by sourceSets.getting
+
+  val addNpmDependencies = project.addSubprojectsTasks(jsMain, "jsBrowserProductionWebpack")
+
+  jsMain.dependencies {
+    implementation(project(":pure"))
+    implementation(compose.web.core)
+    implementation(compose.runtime)
+    addNpmDependencies()
   }
-  project.addSubprojectsTasks(jsMain, "jsBrowserProductionWebpack")
 }
