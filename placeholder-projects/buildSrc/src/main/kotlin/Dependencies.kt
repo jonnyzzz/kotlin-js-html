@@ -12,6 +12,8 @@ object Dependencies {
     "kotlinx.browser.*",
     "kotlinx.html.*",
     "kotlinx.html.dom.*",
+    "kotlinx.serialization.*",
+    "kotlinx.serialization.json.*",
   )
 
   private val compose = setOf(

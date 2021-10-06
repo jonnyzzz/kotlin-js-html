@@ -13,6 +13,8 @@ internal class FileTransformationTest {
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
+      import kotlinx.serialization.*
+      import kotlinx.serialization.json.*
 
       fun main() {
       window.alert("Hello Kotlin/JS in HTML world")
@@ -30,6 +32,8 @@ internal class FileTransformationTest {
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
+      import kotlinx.serialization.*
+      import kotlinx.serialization.json.*
 
       fun main() {
       fun funmain() = window.alert("Hello Kotlin/JS in HTML world")
@@ -47,6 +51,8 @@ internal class FileTransformationTest {
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
+      import kotlinx.serialization.*
+      import kotlinx.serialization.json.*
 
       fun main() = window.alert("Hello Kotlin/JS in HTML world")
       """
@@ -63,6 +69,8 @@ internal class FileTransformationTest {
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
+      import kotlinx.serialization.*
+      import kotlinx.serialization.json.*
 
       fun main() {
           window.alert("Hello Kotlin/JS in HTML world")
@@ -82,6 +90,8 @@ internal class FileTransformationTest {
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
+      import kotlinx.serialization.*
+      import kotlinx.serialization.json.*
 
       fun main (      )
       {
@@ -100,6 +110,8 @@ internal class FileTransformationTest {
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
+      import kotlinx.serialization.*
+      import kotlinx.serialization.json.*
       import react.dom.render
       import kotlinx.browser.document
       import kotlinx.browser.window
@@ -132,6 +144,8 @@ internal class FileTransformationTest {
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
+      import kotlinx.serialization.*
+      import kotlinx.serialization.json.*
       import androidx.compose.runtime.*
       import kotlinx.browser.document
       import kotlinx.browser.window
