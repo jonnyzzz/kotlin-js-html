@@ -2,7 +2,6 @@ import Build.addSubprojectsTasks
 
 plugins {
   kotlin("multiplatform")
-  kotlin("plugin.serialization")
 }
 
 kotlin {
@@ -21,14 +20,19 @@ kotlin {
 
   val addNpmDependencies = project.addSubprojectsTasks(jsMain, "jsBrowserProductionWebpack")
 
+  fun kotlinWrapper(target: String) = "org.jetbrains.kotlin-wrappers:kotlin-$target"
+  val kotlinWrappersVersion = "0.0.1-pre.213-kotlin-1.5.10"
+
   jsMain.dependencies {
     implementation(project(":pure"))
-    implementation("org.jetbrains.kotlin-wrappers:kotlin-react:17.0.2-pre.206-kotlin-1.5.10")
-    implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:17.0.2-pre.206-kotlin-1.5.10")
-    implementation("org.jetbrains.kotlin-wrappers:kotlin-styled:5.3.0-pre.206-kotlin-1.5.10")
-    implementation("org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:5.2.0-pre.206-kotlin-1.5.10")
-    implementation("org.jetbrains.kotlin-wrappers:kotlin-redux:4.0.5-pre.206-kotlin-1.5.10")
-    implementation("org.jetbrains.kotlin-wrappers:kotlin-react-redux:7.2.3-pre.206-kotlin-1.5.10")
+
+    implementation(project.dependencies.enforcedPlatform(kotlinWrapper("wrappers-bom:${kotlinWrappersVersion}")))
+    implementation(kotlinWrapper("react"))
+    implementation(kotlinWrapper("react-dom"))
+    implementation(kotlinWrapper("styled"))
+    implementation(kotlinWrapper("react-router-dom"))
+    implementation(kotlinWrapper("redux"))
+    implementation(kotlinWrapper("react-redux"))
     addNpmDependencies()
   }
 }

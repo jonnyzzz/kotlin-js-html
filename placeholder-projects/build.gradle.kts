@@ -9,7 +9,8 @@ subprojects {
   version = "1.0"
 }
 
-val subBuilds = project.subprojects.map { "${it.path}:fullDistBuildInner" }
+val environments = listOf("pure", "react", "compose")
+val subBuilds = environments.map { "$it:fullDistBuildInner" }
 
 subBuilds.zipWithNext()
   .forEach { (fst, snd) -> project.tasks.getByPath(fst).mustRunAfter(project.tasks.getByPath(snd)) }
