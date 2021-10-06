@@ -5,27 +5,98 @@ import kotlin.test.assertEquals
 internal class FileTransformationTest {
 
   @Test
-  fun `pure - test wrapping into main when not present`() {
-    val input = """
-      fun main() = Unit
-      """
-    val output = """
+  fun `pure - test wrapping into main when main not present - base`() = testTransformation(
+    input = """
+      window.alert("Hello Kotlin/JS in HTML world")
+      """,
+    output = """
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
 
-      fun main() = Unit
+      fun main() {
+      window.alert("Hello Kotlin/JS in HTML world")
+      }
       """
-    testTransformation(input, output)
-  }
+  )
 
   @Test
-  fun `react - test wrapping into main when not present`() {
-    val input = """
+  fun `pure - test wrapping into main when main not present - tricky whitespace`() = testTransformation(
+    input = """
+      fun funmain() = window.alert("Hello Kotlin/JS in HTML world")
+      funmain()
+      """,
+    output = """
+      import kotlinx.browser.*
+      import kotlinx.html.*
+      import kotlinx.html.dom.*
+
+      fun main() {
+      fun funmain() = window.alert("Hello Kotlin/JS in HTML world")
+      funmain()
+      }
+      """
+  )
+
+  @Test
+  fun `pure - test wrapping into main when main present - expression`() = testTransformation(
+    input = """
+      fun main() = window.alert("Hello Kotlin/JS in HTML world")
+      """,
+    output = """
+      import kotlinx.browser.*
+      import kotlinx.html.*
+      import kotlinx.html.dom.*
+
+      fun main() = window.alert("Hello Kotlin/JS in HTML world")
+      """
+  )
+
+  @Test
+  fun `pure - test wrapping into main when main present - block`() = testTransformation(
+    input = """
+      fun main() {
+          window.alert("Hello Kotlin/JS in HTML world")
+      }
+      """,
+    output = """
+      import kotlinx.browser.*
+      import kotlinx.html.*
+      import kotlinx.html.dom.*
+
+      fun main() {
+          window.alert("Hello Kotlin/JS in HTML world")
+      }
+      """
+  )
+
+  @Test
+  fun `pure - test wrapping into main when main present - unusual declaration`() = testTransformation(
+    input = """
+      fun main (      )
+      {
+          window.alert("Hello Kotlin/JS in HTML world")
+      }
+      """,
+    output = """
+      import kotlinx.browser.*
+      import kotlinx.html.*
+      import kotlinx.html.dom.*
+
+      fun main (      )
+      {
+          window.alert("Hello Kotlin/JS in HTML world")
+      }
+      """
+  )
+
+  @Test
+  fun `react - test wrapping into main when present - base`() = testTransformation(
+    input = """
       useReact()
       fun main() = Unit
-      """
-    val output = """
+      """,
+    output = """
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
@@ -48,16 +119,16 @@ internal class FileTransformationTest {
 
       fun main() = Unit
       """
-    testTransformation(input, output)
-  }
+  )
+
 
   @Test
-  fun `compose - test wrapping into main when not present`() {
-    val input = """
+  fun `compose - test wrapping into main when present - base`() = testTransformation(
+    input = """
       useCompose()
       fun main() = Unit
-      """
-    val output = """
+      """,
+    output = """
       import kotlinx.browser.*
       import kotlinx.html.*
       import kotlinx.html.dom.*
@@ -79,8 +150,7 @@ internal class FileTransformationTest {
 
       fun main() = Unit
       """
-    testTransformation(input, output)
-  }
+  )
 
   private fun testTransformation(
     input: String,
