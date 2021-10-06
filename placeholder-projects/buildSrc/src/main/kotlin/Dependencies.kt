@@ -1,5 +1,7 @@
 object Dependencies {
 
+  const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+
   fun getImportsFor(mode: String): List<String> = when (mode) {
     "compose" -> pure + compose
     "react" -> pure + react

@@ -2,6 +2,7 @@ import Build.addSubprojectsTasks
 
 plugins {
   kotlin("multiplatform")
+  kotlin("plugin.serialization")
 }
 
 kotlin {
@@ -25,6 +26,7 @@ kotlin {
 
   jsMain.dependencies {
     implementation(project(":pure"))
+    implementation(Dependencies.serialization)
 
     implementation(project.dependencies.enforcedPlatform(kotlinWrapper("wrappers-bom:${kotlinWrappersVersion}")))
     implementation(kotlinWrapper("react"))
@@ -33,6 +35,7 @@ kotlin {
     implementation(kotlinWrapper("react-router-dom"))
     implementation(kotlinWrapper("redux"))
     implementation(kotlinWrapper("react-redux"))
+
     addNpmDependencies()
   }
 }

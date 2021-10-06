@@ -2,6 +2,7 @@ import Build.addSubprojectsTasks
 
 plugins {
   kotlin("multiplatform")
+  kotlin("plugin.serialization")
   id("org.jetbrains.compose")
 }
 
@@ -23,8 +24,11 @@ kotlin {
 
   jsMain.dependencies {
     implementation(project(":pure"))
+    implementation(Dependencies.serialization)
+
     implementation(compose.web.core)
     implementation(compose.runtime)
+
     addNpmDependencies()
   }
 }

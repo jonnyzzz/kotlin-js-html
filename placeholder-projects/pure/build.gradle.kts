@@ -23,7 +23,8 @@ kotlin {
 
   jsMain.dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+    implementation(Dependencies.serialization)
+
     addNpmDependencies()
   }
 }
