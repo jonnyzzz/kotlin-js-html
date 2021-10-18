@@ -1,3 +1,11 @@
+useNpmPackage("is-sorted:1.0.5")
+
+@JsModule("is-sorted")
+@JsNonModule
+external fun <T> sorted(a: Array<T>): Boolean
+
 fun main() {
   window.alert("Hello Kotlin/JS in HTML world")
+  val data = arrayOf(3,1,2)
+  window.alert("$data is ${if (sorted(data)) "" else "not "}sorted")
 }

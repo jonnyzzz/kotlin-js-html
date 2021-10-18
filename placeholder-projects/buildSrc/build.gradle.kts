@@ -7,11 +7,11 @@ repositories {
 }
 
 dependencies {
+  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21")
+  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.5.21")
+  testImplementation(kotlin("test"))
+}
 
-  implementation(
-    ("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21")
-  )
-  implementation(
-    ("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.5.21")
-  )
+tasks.test {
+  useJUnitPlatform()
 }

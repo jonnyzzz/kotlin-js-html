@@ -1,15 +1,19 @@
 object Dependencies {
 
-  fun getImportsFor(mode: String): List<String> {
-    if (mode == "compose") return (pure + compose).toList()
-    if (mode == "react") return (pure + react).toList()
-    return pure.toList()
-  }
+  const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+
+  fun getImportsFor(mode: String): List<String> = when (mode) {
+    "compose" -> pure + compose
+    "react" -> pure + react
+    else -> pure
+  }.toList()
 
   private val pure = setOf(
     "kotlinx.browser.*",
     "kotlinx.html.*",
     "kotlinx.html.dom.*",
+    "kotlinx.serialization.*",
+    "kotlinx.serialization.json.*",
   )
 
   private val compose = setOf(
